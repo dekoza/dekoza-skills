@@ -4,7 +4,7 @@ This file defines **non-negotiable rules** for AI agents working across all proj
 If any rule conflicts with system or higher-priority instructions, **follow the higher-priority instruction**.
 If a project has its own `AGENTS.md`, its rules take precedence for project-specific concerns; these global rules apply everywhere else.
 
-You are a very skilled AI developer working on Python libraries and web applications (Django).
+You are a very skilled AI developer working on Python libraries and web applications.
 Your goal is to produce **high-quality, maintainable, well-tested code** that meets the user's requirements precisely.
 
 ## Hardline Review and Honesty Policy
@@ -50,7 +50,7 @@ You must default to adversarial evaluation. You must assume the user’s reasoni
   exceptions, error messages, logs, CLI help, etc.
 - Do not use any language other than English in library messages.
 
-### 1.2 Web applications (Django)
+### 1.2 Web applications
 
 - If there are signals that the user's primary language is not English (e.g., non-English commit messages, comments, variable names, or explicit statement), **ask the user** whether user-facing messages should be in English or their native language.
 - User-facing messages include: UI/CLI texts, error messages shown to users, TUI text, help/usage.
@@ -88,7 +88,7 @@ You must default to adversarial evaluation. You must assume the user’s reasoni
   - Happy path testing is the **bare minimum** — every user-facing flow must have at least one happy path E2E test.
   - Skipping Playwright E2E for a webapp with frontend = **bug** (must add before task is complete).
 - **Web applications: test execution environment.** (very important)
-  - Integration and E2E tests for web applications MUST run in an isolated Docker-based test environment (see section 13).
+  - Integration and E2E tests for web applications MUST run in an isolated Docker-based test environment (see section 11).
   - Unit tests (pure logic, no DB, no browser) run on host for fast TDD feedback.
   - This split preserves TDD speed while guaranteeing test environment isolation.
 
@@ -110,53 +110,9 @@ You must default to adversarial evaluation. You must assume the user’s reasoni
 - If you need to add a package:
   - add it via the correct tool into `pyproject.toml`,
   - do not run ad-hoc `pip install` without explicit justification.
-- Dev-only packages (debug toolbar, django-extensions, etc.) must have `try/except ImportError` guards in settings so production never breaks if they're absent.
+- Dev-only packages (debug toolbar, etc.) must have `try/except ImportError` guards in settings so production never breaks if they're absent.
 
-## 5) Dates and time
-
-- For web applications that manipulate dates/times (`datetime`, timezones, parsing/formatting, arithmetic, comparisons, serialization), use **`pendulum`**.
-- Don't mix multiple time approaches unless required.
-- For library code, **do not use `pendulum`** unless documentation explicitly allows it.
-
-## 6) Web projects: HTML, JS, components, UI
-
-### 6.0 Default technology context
-
-- Primary areas: **Python libraries** and **web applications**.
-- Web frameworks:
-  - **Django** (templates/partials as the default),
-- UI framework: **Tabler** (<https://tabler.io/>).
-
-### 6.1 Inline HTML in Python (very limited)
-
-- Inline HTML in Python is allowed only as a last resort and must be minimal.
-- Readability limit: do not exceed ~60 characters (hard max: 66) of inline HTML **total per code indentation block**.
-- If markup is larger or starts to dominate logic: create a template/partial/component and render normally.
-
-### 6.2 Backend partials/components (HTMX mindset)
-
-- Prefer backend-rendered components (similar to `django-partials` approach).
-- Default path in web projects:
-  - Django: templates + includes/partials/macros,
-  - interactions: **HTMX**.
-- Keep the HTMX paradigm: backend renders HTML; frontend is minimal.
-- Partials/includes/macros are encouraged to avoid duplication and reduce inline HTML.
-
-### 6.3 JavaScript is disallowed by default
-
-- Unless explicitly required, do not use JavaScript.
-- Allowed only as a minimal wrapper for:
-  - WebSocket,
-  - Local Storage,
-  - strictly within a PWA context.
-
-### 6.4 Frontend tool preference order
-
-1) plain HTML + CSS
-2) if needed → **HTMX**
-3) last resort → **Hyperscript**
-
-## 7) Respect user changes (very important)
+## 5) Respect user changes (very important)
 
 When you start a new session or encounter code that differs from what you might expect:
 
@@ -176,7 +132,7 @@ When you start a new session or encounter code that differs from what you might 
    - Reverting or overwriting user code without explicit request = **bug** (must fix).
    - Silently "improving" user code that wasn't part of the task = **bug** (must fix).
 
-## 8) Scope control — change only what was asked for
+## 6) Scope control — change only what was asked for
 
 1. **Touch only what the task requires.**
    - If asked to fix function X, do not also "improve" function Y nearby.
@@ -190,7 +146,7 @@ When you start a new session or encounter code that differs from what you might 
 3. **Enforcement:**
    - Unasked-for changes outside the task scope = **bug** (must revert).
 
-## 9) Anti-slop and verbosity
+## 7) Anti-slop and verbosity
 
 AI-generated code has recognizable bad habits. Avoid them:
 
@@ -210,7 +166,7 @@ AI-generated code has recognizable bad habits. Avoid them:
    - Code that reads like it was generated by a chatbot = **must rewrite**.
    - If you catch yourself adding a comment that restates the line above, delete it.
 
-## 10) Commit behavior and git history
+## 8) Commit behavior and git history
 
 Git history is a **source of truth** for how the project evolved. Treat it accordingly.
 
@@ -253,111 +209,85 @@ Git history is a **source of truth** for how the project evolved. Treat it accor
    - If you need to remove specific files (e.g., rogue files created by a misbehaving subagent), delete them **one by one by exact path** after listing them to the user.
    - Enforcement: running any of the above without explicit user request = **bug** (catastrophic, possibly unrecoverable).
 
-## 11) Common pitfalls (learned from production projects)
+## 9) Common pitfalls (learned from production projects)
 
 These patterns have caused real bugs across multiple projects. Internalize them.
 
-### 11.1 Django / ORM
+### 9.1 Testing
 
-- **Always use `.distinct()`** after filtering through M2M or reverse FK relations — duplicate rows are the default without it.
-- **Always use `select_related()` / `prefetch_related()`** — N+1 queries are the #1 Django performance bug.
-- **Verify model field names from source** before using them. Do not guess field names — read the model definition. Common mistake: using a plausible name (`kind`, `context`, `code`) that doesn't match the actual field (`station_kind`, `details_json`, `card_code`).
-- **Prefer `TemplateResponse`** over `render()` in Django views — it allows middleware to modify context before rendering.
-- **When renaming model fields**, grep ALL usages: views, services, serializers, forms, templates, test fixtures, factories, admin.
-- **`auto_now=True` fields** cannot be set via `.save()` — use `.objects.filter().update(field=value)` to bypass.
-- **URL mount points are hierarchical** — child URLconf should NOT repeat the parent prefix. Catch-all URL patterns (`path("")`) must be LAST in `urlpatterns`.
-
-### 11.2 Testing
-
-- **Check model field definitions** before writing test fixtures — mismatched field names, constraints, or types cause confusing test failures.
-- **Use `update_or_create()`** in tests when seed migrations pre-populate data — avoids unique constraint violations.
-- **Avoid `factory_boy`'s `django_get_or_create`** for uniqueness tests — use `Sequence` for auto-unique values instead.
-- **Use test-only prefixed values** (e.g., `TEST_xxx`) to avoid collisions with seed/migration data.
 - **`httpx.MockTransport`** is sufficient for HTTP client tests — no need for `unittest.mock` patch gymnastics.
 
-### 11.3 HTMX
-
-- **Detect HX-Request header** in views to return partials vs full pages.
-- **Use template variables** for dynamic markers (e.g., `{{ result_marker }}`), not hardcoded strings — keeps tests and templates in sync.
-
-### 11.4 Infrastructure / Docker
+### 9.2 Infrastructure / Docker
 
 - **Docker non-root user UID** should match host user to avoid bind-mount permission issues.
 - **`USER` directive** must come AFTER all `RUN`/`COPY` commands in Dockerfile.
-- **WhiteNoise middleware** must be second in `MIDDLEWARE` (after `SecurityMiddleware`).
 - **Docker Compose profiles** allow multiple service configs in a single file — use them instead of separate compose files for configuration variants.
-- **Exception**: test infrastructure MUST use a separate `compose.test.yml` — profiles do not provide lifecycle independence (see section 13).
+- **Exception**: test infrastructure MUST use a separate `compose.test.yml` — profiles do not provide lifecycle independence (see section 11).
 
-### 11.5 Security
+### 9.3 Security
 
 - **HMAC verification**: if signature is embedded in the JSON payload, reconstruct the payload with an empty signature field before verifying.
 - **Use `hmac.compare_digest()`** for constant-time token/signature comparison — never use `==`.
 - **Signed cookies with unsigned fallback** for backward compatibility during migration.
 
-### 11.6 Architecture
+### 9.4 Architecture
 
 - **Cross-context imports** should use public API (`from apps.context import Symbol`), not internal modules (`from apps.context.models import Symbol`).
 - **Circular import prevention**: place deferred imports inside functions with `# Circular import:` comment. For `__init__.py`, use PEP 562 lazy `__getattr__`.
-- **JSON stored in `TextField`**: always `json.loads()` before accessing — it's a string, not a dict.
 
-## 12) Playwright and E2E browser testing (agent environments)
+## 10) Playwright and E2E browser testing (agent environments)
 
 Playwright is required for UI testing in projects with frontend/UI.
 
-**For web applications with Docker-based test environments** (section 13): Playwright is pre-installed in the `tests` container. The detection checklist (12.1), fallback strategies (12.4), and related enforcement are superseded — skip to section 13.
+**For web applications with Docker-based test environments** (section 11): Playwright is pre-installed in the `tests` container. The detection checklist (10.1), fallback strategies (10.4), and related enforcement are superseded — skip to section 11.
 
 **For library projects and environments without Docker**: the rules below apply. Browser binary installation carries real constraints: it times out, may require sudo (forbidden in agents), consumes resources, and fails silently without explicit configuration. These rules prevent silent failures and dangerous workarounds.
 
-### 12.0 Critical constraint
+### 10.0 Critical constraint
 
 - **NEVER install Playwright without explicit user request.** If `playwright` is not in `pyproject.toml` (or `package.json` for frontend tests), do not run `pip install playwright` or `npx playwright install`. Stop immediately after 60 seconds of detection attempts.
-- **Installation timeout**: browser binary downloads often exceed 10 minutes in agent environments. If installation begins, set a hard timeout of 5 minutes. If not complete, kill the process and fall back to strategy 12.4.
-- **Sudo is forbidden.** Do not attempt `sudo apt-get install chromium` or similar. If system Playwright binary installation requires sudo, mark it as unavailable and use fallback (12.4).
+- **Installation timeout**: browser binary downloads often exceed 10 minutes in agent environments. If installation begins, set a hard timeout of 5 minutes. If not complete, kill the process and fall back to strategy 10.4.
+- **Sudo is forbidden.** Do not attempt `sudo apt-get install chromium` or similar. If system Playwright binary installation requires sudo, mark it as unavailable and use fallback (10.4).
 
-### 12.1 Detection checklist
+### 10.1 Detection checklist
 
 Run these checks in order. Stop after each step if condition is false:
 
-1. Check `pyproject.toml` for `playwright` dependency (or `package.json` for `@playwright/test`). If absent, skip to 12.4 (fallback). If present, continue.
-2. Attempt a 60-second binary availability check: import `async_playwright`, launch `chromium` with `headless=True` and `--no-sandbox`, close cleanly. If successful, continue. If timeout or import error, skip to 12.4.
-3. If steps 1–2 pass, run E2E tests with headless mode (12.2). If tests fail, review known pitfalls (12.3) before retrying.
+1. Check `pyproject.toml` for `playwright` dependency (or `package.json` for `@playwright/test`). If absent, skip to 10.4 (fallback). If present, continue.
+2. Attempt a 60-second binary availability check: import `async_playwright`, launch `chromium` with `headless=True` and `--no-sandbox`, close cleanly. If successful, continue. If timeout or import error, skip to 10.4.
+3. If steps 1–2 pass, run E2E tests with headless mode (10.2). If tests fail, review known pitfalls (10.3) before retrying.
 
-### 12.2 Headless mode
+### 10.2 Headless mode
 
 - **Always set `headless=True`** in all Playwright browser launches. Never run headed mode (`headless=False`) in agent environments.
 - **Critical Chromium launch arguments**: include `--no-sandbox` (required in containers), `--disable-dev-shm-usage` (prevents memory exhaustion), and `--disable-gpu` (reduces resource overhead).
 - **Environment variable timing**: set `PLAYWRIGHT_BROWSERS_PATH` BEFORE any Playwright import. If this path is unset and browser binaries do not exist in default location, import will fail silently and later launch attempts will hang.
 
-### 12.3 Known pitfalls
+### 10.3 Known pitfalls
 
 - **Browser install timeout**: downloading + extracting binaries often takes 10–15 minutes on slow links. If not configured, default timeout is usually 30 seconds — set explicit timeout or pre-install before running tests.
-- **Django redirect loops**: if `live_server` fixture is present but not passed to page `goto(url)`, the browser may redirect infinitely to login. Always use `live_server.url` in E2E page navigation.
-- **Base URL fixture missing**: Playwright tests require an explicit `base_url` or `live_server.url` parameter. Without it, page navigation defaults to localhost and may fail.
-- **Static files not served**: Django `live_server` does not serve static files by default. Use `django.test.override_settings(STATIC_ROOT=...)` or `runserver` in test mode.
-- **`collectstatic` not run**: if static files are required, run `manage.py collectstatic --noinput` BEFORE launching Playwright tests.
 - **Package installed ≠ browsers available**: `pip install playwright` installs the Python package but NOT the browser binaries. Run `playwright install` (as separate command) or set `PLAYWRIGHT_INSTALL_BROWSERS` environment variable to `true`.
 
-### 12.4 Fallback strategies
+### 10.4 Fallback strategies
 
 If Playwright cannot run in the current environment, use these strategies in priority order:
 
 1. **System Chromium**: if system has Chromium installed (verify with `which chromium` or `which google-chrome`), launch Playwright with `executable_path=/usr/bin/chromium` (or actual path). This avoids binary download.
-2. **Django test client or httpx**: replace Playwright tests with integration tests using Django's test client or `httpx` mock transport. These tests run the application logic without a real browser.
-3. **Mark E2E as unavailable**: if neither 12.4.1 nor 12.4.2 is acceptable for the use case, explicitly document why E2E is skipped. DO NOT silently skip without justification.
+2. **Mark E2E as unavailable**: if 10.4.1 is not acceptable for the use case, explicitly document why E2E is skipped. DO NOT silently skip without justification.
 
-### 12.5 Enforcement
+### 10.5 Enforcement
 
 - **Attempting Playwright install without user request** (i.e., `pip install playwright` when not in `pyproject.toml`) = **bug**. Revert immediately.
-- **Running `sudo` to install or configure Playwright** = **bug**. Agent environment must not escalate privileges. Use fallback (12.4) or ask user to pre-configure.
+- **Running `sudo` to install or configure Playwright** = **bug**. Agent environment must not escalate privileges. Use fallback (10.4) or ask user to pre-configure.
 - **Launching Playwright with `headless=False`** in an agent environment = **bug**. Headed mode will hang indefinitely.
-- **Skipping E2E tests without attempting fallback strategies** (12.4.1 or 12.4.2) when Playwright binary unavailable = **bug**. Document why fallbacks are unsuitable before skipping.
-- **Spending > 5 minutes attempting to install Playwright binaries** without explicit timeout control = **bug**. Set hard timeout (12.0) or switch to fallback (12.4).
+- **Skipping E2E tests without attempting fallback strategies** (10.4.1 or 10.4.2) when Playwright binary unavailable = **bug**. Document why fallbacks are unsuitable before skipping.
+- **Spending > 5 minutes attempting to install Playwright binaries** without explicit timeout control = **bug**. Set hard timeout (10.0) or switch to fallback (10.4).
 
-## 13) Docker-based test environment (web applications) (very important)
+## 11) Docker-based test environment (web applications) (very important)
 
 Web application testing MUST use an isolated Docker-based test environment for integration and E2E tests. This provides lifecycle independence from the development stack, eliminates port conflicts, and creates a reproducible sterile environment.
 
-### 13.0 Architecture
+### 11.0 Architecture
 
 The test environment consists of:
 
@@ -367,25 +297,25 @@ The test environment consists of:
 
 These services live in a **separate compose file** (`compose.test.yml`) — NOT in the main `compose.yml`. This ensures lifecycle independence: tearing down the dev stack does not affect running tests, and vice versa.
 
-### 13.1 Non-negotiable constraints
+### 11.1 Non-negotiable constraints
 
 - **No public ports.** Test containers MUST NOT map ports to the host. Internal Docker networking only.
 - **testdb reachable only from test network.** The test database must not be accessible from dev containers or the host.
 - **Lifecycle independence.** `docker compose down` (dev) MUST NOT affect tests. `docker compose -f compose.test.yml down` (tests) MUST NOT affect dev.
 
-### 13.2 Test execution model
+### 11.2 Test execution model
 
 - **Unit tests** (pure logic, no DB, no browser): run directly on host for TDD speed (`uv run pytest tests/unit/` or `poetry run pytest tests/unit/`).
 - **Integration tests** (DB, HTTP, IO): run inside Docker via `compose.test.yml`.
 - **E2E tests** (Playwright, browser): run inside Docker via `compose.test.yml`. Playwright and Chromium are pre-installed in the `tests` container image — no ad-hoc browser installation.
 
-### 13.3 Agent responsibilities
+### 11.3 Agent responsibilities
 
 - If `compose.test.yml` does not exist, the agent **MUST create it** along with the `Dockerfile.test` for the tests container.
-- If a `Makefile` exists or is appropriate, add test-related targets (see 13.5).
+- If a `Makefile` exists or is appropriate, add test-related targets (see 11.5).
 - After creating test infrastructure, the agent must verify it works by running a smoke test (`make test-unit` + `make test-integration` or equivalent).
 
-### 13.4 compose.test.yml reference structure
+### 11.4 compose.test.yml reference structure
 
 ```yaml
 services:
@@ -424,7 +354,7 @@ networks:
     driver: bridge
 ```
 
-### 13.5 Makefile targets
+### 11.5 Makefile targets
 
 Projects using Docker-based test environments should include these targets:
 
@@ -454,7 +384,7 @@ test-down:             ## Tear down test environment
 
 Adapt `uv` → `poetry` based on the project's lockfile (see section 4).
 
-### 13.6 Dockerfile.test reference
+### 11.6 Dockerfile.test reference
 
 The tests container image must include the application code, dependencies, pytest, and — if E2E tests exist — Playwright with browser binaries.
 
@@ -482,7 +412,7 @@ COPY . .
 
 Adapt for `poetry` if the project uses `poetry.lock`.
 
-### 13.7 Enforcement
+### 11.7 Enforcement
 
 - Integration/E2E tests running outside Docker in a webapp with `compose.test.yml` = **bug**.
 - Test containers exposing ports to host = **bug**.
