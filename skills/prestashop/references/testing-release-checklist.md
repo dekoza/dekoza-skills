@@ -1,3 +1,10 @@
+---
+scope: prestashop
+target_versions: "PrestaShop 9.x, PHP 8.2+"
+last_verified: 2026-03-19
+source_basis: production experience
+---
+
 # Testing and Release Checklist
 
 A PrestaShop module is not complete because it installs and shows up in the module list.

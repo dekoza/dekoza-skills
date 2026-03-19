@@ -1,3 +1,10 @@
+---
+scope: tabler
+target_versions: "Tabler 1.x"
+last_verified: 2026-03-19
+source_basis: official docs
+---
+
 # Page Patterns
 
 Page-level composition patterns from preview.tabler.io. These references show how Tabler-specific classes combine into complete screens rather than isolated components.

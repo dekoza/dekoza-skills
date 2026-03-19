@@ -1,6 +1,10 @@
 ---
 name: django
 description: "Use when tasks involve Django models, views, URLs, templates, forms, admin, auth, middleware, signals, settings, testing, or project architecture. Covers Django 6.0 framework patterns, gotchas, and internals."
+scope: django
+target_versions: "Django 6.0, Python 3.12+"
+last_verified: 2026-03-19
+source_basis: production experience
 ---
 
 # Django 6.0 Framework Reference

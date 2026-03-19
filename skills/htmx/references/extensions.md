@@ -1,6 +1,10 @@
 ---
 description: Official HTMX extensions — WebSockets, SSE, Idiomorph, response targets, head support, and preload.
 globs: "*.html"
+scope: htmx
+target_versions: "HTMX 2.x"
+last_verified: 2026-03-19
+source_basis: official docs
 ---
 
 # HTMX Extensions

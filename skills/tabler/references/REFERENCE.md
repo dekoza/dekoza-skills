@@ -1,3 +1,10 @@
+---
+scope: tabler
+target_versions: "Tabler 1.x"
+last_verified: 2026-03-19
+source_basis: official docs
+---
+
 # Tabler UI: Complete Reference Index
 
 Cross-domain index of 14 reference files for Tabler components, layouts, and plugins.

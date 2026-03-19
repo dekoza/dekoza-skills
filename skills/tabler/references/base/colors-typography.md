@@ -1,3 +1,10 @@
+---
+scope: tabler
+target_versions: "Tabler 1.x"
+last_verified: 2026-03-19
+source_basis: official docs
+---
+
 # Colors & Typography
 
 Complete reference for Tabler's color system, typography utilities, CSS custom properties, icon patterns, and low-level layout helpers.

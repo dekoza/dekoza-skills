@@ -1,6 +1,10 @@
 ---
 description: Practical gotchas, common pitfalls, and field-tested guidance for getting the most out of HTMX.
 globs: "*.html"
+scope: htmx
+target_versions: "HTMX 2.x"
+last_verified: 2026-03-19
+source_basis: production experience
 ---
 
 # HTMX Gotchas & Practical Guidance

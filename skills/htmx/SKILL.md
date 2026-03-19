@@ -1,6 +1,10 @@
 ---
 name: htmx
 description: "Use when tasks involve hx-* attributes, HTMX AJAX requests, swap strategies, server-sent events, WebSockets, or hypermedia-driven UIs."
+scope: htmx
+target_versions: "HTMX 2.x"
+last_verified: 2026-03-19
+source_basis: official docs
 ---
 
 # HTMX

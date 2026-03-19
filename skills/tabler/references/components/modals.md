@@ -1,3 +1,10 @@
+---
+scope: tabler
+target_versions: "Tabler 1.x"
+last_verified: 2026-03-19
+source_basis: official docs
+---
+
 # Modals
 
 Complete reference for Tabler modal component (based on Bootstrap modals).

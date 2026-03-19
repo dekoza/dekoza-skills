@@ -1,3 +1,10 @@
+---
+scope: prestashop
+target_versions: "PrestaShop 9.x, PHP 8.2+"
+last_verified: 2026-03-19
+source_basis: production experience
+---
+
 # PrestaShop 9 Gotchas
 
 This file exists because many modules fail specifically on PrestaShop 9 while looking fine on paper.

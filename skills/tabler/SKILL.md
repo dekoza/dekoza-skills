@@ -1,6 +1,10 @@
 ---
 name: tabler
 description: "Use when tasks involve Tabler UI components, CSS classes, variants, or layout patterns. Comprehensive reference for Tabler HTML/CSS framework."
+scope: tabler
+target_versions: "Tabler 1.x"
+last_verified: 2026-03-19
+source_basis: official docs
 ---
 
 # Tabler UI Reference
@@ -103,5 +107,4 @@ Tabler is built on Bootstrap 5.3. Use these utilities freely:
 **Borders**:
 - `.border`, `.border-top`, `.border-end`, `.border-bottom`, `.border-start`
 - `.rounded`, `.rounded-circle`, `.rounded-0`, `.rounded-3`
-
 

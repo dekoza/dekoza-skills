@@ -1,3 +1,10 @@
+---
+scope: prestashop
+target_versions: "PrestaShop 9.x, PHP 8.2+"
+last_verified: 2026-03-19
+source_basis: official docs
+---
+
 # Main Module Class
 
 The main module class is the entrypoint, not the whole application.

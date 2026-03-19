@@ -1,6 +1,10 @@
 ---
 description: Common HTMX UI patterns and implementation examples.
 globs: "*.html"
+scope: htmx
+target_versions: "HTMX 2.x"
+last_verified: 2026-03-19
+source_basis: production experience
 ---
 
 # HTMX Patterns

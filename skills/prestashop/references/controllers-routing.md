@@ -1,3 +1,10 @@
+---
+scope: prestashop
+target_versions: "PrestaShop 9.x, PHP 8.2+"
+last_verified: 2026-03-19
+source_basis: official docs
+---
+
 # Controllers and Routing
 
 PrestaShop 9 modules can use both legacy-style module controllers and modern Symfony controllers. Confusing the two is one of the fastest ways to ship a module that installs but does not work.

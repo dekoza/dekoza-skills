@@ -2,6 +2,10 @@
 domain: middleware-signals
 category: architecture
 priority: high
+scope: django
+target_versions: "Django 6.0, Python 3.12+"
+last_verified: 2026-03-19
+source_basis: production experience
 ---
 
 # Django Middleware & Signals Reference

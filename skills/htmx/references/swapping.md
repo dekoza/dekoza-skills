@@ -1,6 +1,10 @@
 ---
 description: HTMX swap strategies, targets, OOB swaps, morphing, and transitions.
 globs: "*.html"
+scope: htmx
+target_versions: "HTMX 2.x"
+last_verified: 2026-03-19
+source_basis: official docs
 ---
 
 # HTMX Swapping

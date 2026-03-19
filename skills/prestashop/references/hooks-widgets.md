@@ -1,3 +1,10 @@
+---
+scope: prestashop
+target_versions: "PrestaShop 9.x, PHP 8.2+"
+last_verified: 2026-03-19
+source_basis: official docs
+---
+
 # Hooks and Widgets
 
 Hooks are the default extension mechanism in PrestaShop. They are also one of the easiest places for an agent to hallucinate.

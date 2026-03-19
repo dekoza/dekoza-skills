@@ -1,3 +1,10 @@
+---
+scope: tabler
+target_versions: "Tabler 1.x"
+last_verified: 2026-03-19
+source_basis: official docs
+---
+
 # Plugins
 
 Reference for Tabler plugin-style components, Bootstrap behaviors, and external-library integrations that are missing from the existing component files.

@@ -1,6 +1,10 @@
 ---
 name: prestashop
 description: "Use when tasks involve PrestaShop 9 modules: module structure, hooks, front/admin controllers, modern configuration pages, services, persistence, external API integrations, cron/commands, packaging, compatibility, or release debugging. This skill exists to stop agents from inventing framework classes, guessing hook contracts, or shipping fake Symfony/PrestaShop internals."
+scope: prestashop
+target_versions: "PrestaShop 9.x, PHP 8.2+"
+last_verified: 2026-03-19
+source_basis: official docs
 ---
 # PrestaShop 9 Module Development Reference
 

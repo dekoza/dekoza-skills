@@ -2,6 +2,10 @@
 domain: Django Auth & Security
 category: security
 priority: critical
+scope: django
+target_versions: "Django 6.0, Python 3.12+"
+last_verified: 2026-03-19
+source_basis: official docs
 ---
 
 # Django Auth & Security Reference

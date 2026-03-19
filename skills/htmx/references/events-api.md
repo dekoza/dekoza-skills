@@ -1,6 +1,10 @@
 ---
 description: HTMX events, JavaScript API, configuration, extensions, and debugging.
 globs: "*.html,*.js"
+scope: htmx
+target_versions: "HTMX 2.x"
+last_verified: 2026-03-19
+source_basis: official docs
 ---
 
 # HTMX Events & API

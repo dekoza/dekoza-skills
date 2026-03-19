@@ -1,3 +1,10 @@
+---
+scope: prestashop
+target_versions: "PrestaShop 9.x, PHP 8.2+"
+last_verified: 2026-03-19
+source_basis: official docs
+---
+
 # External APIs and Scheduled Synchronization
 
 This is where AI-written PrestaShop modules most often fail. The usual pattern is superficial success: the module installs, settings save, and the sync still does not work.
