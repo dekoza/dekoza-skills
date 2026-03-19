@@ -17,17 +17,21 @@ This is a collection of those guardrails — framework-specific skills that enco
 AI coding assistants hallucinate API parameters, ignore framework conventions, and produce code that looks plausible until you actually run it. The standard response is to paste documentation into prompts and hope for the best.
 
 These skills are a more structured attempt at the same losing battle. They give AI agents:
+
 - **Critical rules** they will otherwise violate on every other generation
 - **Gotcha lists** compiled from actual bugs, not theoretical edge cases
 - **Reference maps** so they look things up instead of inventing things
 
 Does it work? Sometimes. Better than without? Measurably. A reason for optimism? No.
 
+Case in point: The agent messed up two times while creating this repo (deleting uncommited skill and README) to the point that I needed to hand it the solution scraped from the terminal with a spatula. And all I asked was to sanitize the contents. The irony is killing me...
+
 ## How to use
 
 These skills are built for [OpenCode](https://github.com/opencode-ai/opencode) agents. Drop the skill directories into your OpenCode skills path and reference them in your agent configuration.
 
 Each skill follows the same structure:
+
 ```
 skill-name/
 ├── SKILL.md              # Entry point — critical rules, quick start, reference map
