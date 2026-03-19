@@ -1,4 +1,4 @@
-# dekoza-skills
+# oh-my-slop
 
 After enough hours watching AI confidently produce wrong code, you stop hoping it'll get better and start building guardrails instead.
 
