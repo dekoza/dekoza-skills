@@ -1,0 +1,68 @@
+{
+  "skill_name": "http-status-codes",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "You are reviewing a new B2B orders API. Map each outcome to the best HTTP status code and briefly explain why: malformed JSON body; missing bearer token; expired bearer token; authenticated user without the `warehouse:write` scope; unknown order id; promo code that used to exist but was intentionally retired and will never come back; POST /orders creates an order immediately; POST /exports starts an asynchronous CSV export job; PATCH /orders/123 with a stale `If-Match`; PATCH /orders/123 when this API requires `If-Match` but the client omitted it; POST /coupons with a coupon code that already exists; POST /users with a valid JSON body but an invalid email address; client exceeds a per-token rate limit; the whole service is temporarily in maintenance mode. Mention any headers that are required or strongly recommended.",
+      "expected_output": "The response maps each scenario to a specific standards-based status code, distinguishes 400 from 422, 401 from 403, 404 from 410, 409 from 412 from 428, and 429 from 503, and mentions headers such as WWW-Authenticate, Location, and Retry-After where relevant.",
+      "files": [],
+      "expectations": [
+        "It uses 400 for malformed JSON and 422 for semantically invalid but well-formed content.",
+        "It uses 401 for missing or expired bearer credentials and mentions WWW-Authenticate.",
+        "It uses 403 for insufficient scope, not 401.",
+        "It distinguishes 404 Not Found from 410 Gone for intentionally retired resources.",
+        "It uses 201 for immediate creation and 202 for accepted asynchronous work.",
+        "It uses 412 for a failed If-Match precondition and 428 when the required precondition was omitted.",
+        "It uses 409 or explicitly justifies 422 for the duplicate coupon scenario instead of collapsing it into 400.",
+        "It uses 429 for per-client throttling and 503 for service-wide temporary unavailability, with Retry-After where appropriate."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "An existing public API currently returns `400 Bad Request` for all of these cases: malformed JSON, missing Authorization header, expired access token, invalid email format, duplicate username, unsupported `Content-Type`, stale ETag update, and rate limiting. Rewrite the status-code policy so it uses more precise HTTP codes, but explicitly call out any compatibility risks of changing an already published API contract. Keep the answer practical for an API review.",
+      "expected_output": "The response rewrites the policy with more specific codes such as 401, 409, 412, 415, 422, and 429, and it notes that an existing public contract may intentionally keep broader codes for backward compatibility even when they are not ideal semantically.",
+      "files": [],
+      "expectations": [
+        "It replaces missing or expired auth failures with 401 rather than 400.",
+        "It replaces unsupported Content-Type with 415.",
+        "It distinguishes malformed JSON from validation failures.",
+        "It uses 412 for stale ETag updates.",
+        "It uses 429 for rate limiting.",
+        "It explicitly mentions backward-compatibility risk when changing an existing public API contract."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Design client-side handling rules for a payment SDK that can receive these responses: 401, 403, 404, 409, 412, 422, 429, 500, 502, 503, and 504. For each one, say whether the SDK should refresh credentials, show a user-correctable error, refetch state and retry intentionally, back off automatically, or avoid retrying. Assume non-idempotent POST requests are protected by idempotency keys.",
+      "expected_output": "The response explains the expected client behavior per status code rather than only restating server semantics. It distinguishes auth refresh from permission denial, semantic validation from state conflicts, and rate limiting from temporary service outages.",
+      "files": [],
+      "expectations": [
+        "It recommends credential refresh or re-authentication for 401 but not for 403.",
+        "It avoids automatic retry for 403, 404, and 422 as-is.",
+        "It treats 404 as a stop or user-correction path, not an authentication or retry path.",
+        "It recommends refetch-and-resolve behavior for 409 and 412.",
+        "It distinguishes 422 from 409 or 412 by treating 422 as a data-fix problem rather than a state-refresh problem.",
+        "It recommends backoff for 429 and 503, using Retry-After when available.",
+        "It distinguishes 500 from 502 and 504 by treating the latter two as more clearly transient upstream failures.",
+        "It treats 502 and 504 as potentially retryable transport or upstream failures.",
+        "It notes that idempotency keys make retries safer for POST requests when the failure is transient."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "You are reviewing an HTTP API style guide that says: 'Use 302 for temporary redirects, 301 for permanent redirects, 400 for unsupported methods, 500 for upstream timeouts, and 503 when a reverse proxy gets malformed bytes from a dependency.' Rewrite the guidance with the most precise status codes and briefly justify each correction, including when method preservation or follow-up GET behavior matters.",
+      "expected_output": "The response corrects redirect behavior and infrastructure failures with specific standards-based codes, including 303 vs 307 vs 308, 405 vs 501, and 502 vs 504.",
+      "files": [],
+      "expectations": [
+        "It explains that 302 and 301 are not always sufficient when method preservation matters.",
+        "It uses 303 for POST-redirect-GET behavior.",
+        "It uses 307 for temporary redirects that must preserve method and body.",
+        "It uses 308 for permanent redirects that must preserve method and body.",
+        "It replaces '400 for unsupported methods' with 405 for resource-specific denial or 501 for unsupported server capability, and mentions Allow for 405.",
+        "It uses 504 for upstream timeout scenarios.",
+        "It uses 502 for invalid upstream responses rather than 503.",
+        "It keeps 503 for temporary overload or maintenance rather than malformed upstream bytes."
+      ]
+    }
+  ]
+}
