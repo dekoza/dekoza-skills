@@ -1,0 +1,41 @@
+{
+  "skill_name": "htmx",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Build an active-search interaction with HTMX: typing in the search box should debounce requests and replace only the results list with server-rendered HTML.",
+      "expected_output": "The response uses HTMX as hypermedia, not as a thin wrapper around JSON. It chooses the right trigger, target, and swap semantics for a server-rendered active-search interaction.",
+      "files": [],
+      "expectations": [
+        "It returns or expects HTML fragments rather than JSON for the HTMX update.",
+        "It uses an HTMX trigger pattern appropriate for debounced search input.",
+        "It targets only the results region rather than re-rendering the whole page needlessly.",
+        "It chooses a sensible swap strategy for replacing search results."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Implement delete-row behavior with HTMX so the user confirms the action and the deleted row disappears cleanly without a full page reload.",
+      "expected_output": "The response uses HTMX interaction semantics intentionally. It picks the right element type, request trigger, and swap behavior for row deletion and keeps the UX semantically sound.",
+      "files": [],
+      "expectations": [
+        "It uses semantic action elements such as a button for deletion rather than misusing plain links.",
+        "It specifies HTMX attributes that update only the affected row or table region.",
+        "It handles confirmation in an HTMX-appropriate way.",
+        "It keeps the solution server-rendered rather than switching to client-side state management."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I want a modal loaded via HTMX. Explain the target and swap choices clearly, and tell me what common HTMX inheritance or event mistakes to avoid.",
+      "expected_output": "The response explains the HTMX mechanics, not just the final markup. It chooses a target/swap strategy that makes modal loading work and calls out common inheritance or event pitfalls.",
+      "files": [],
+      "expectations": [
+        "It explains the chosen target and swap semantics explicitly.",
+        "It calls out at least one relevant HTMX inheritance or event pitfall.",
+        "It keeps the guidance in HTMX terms instead of sliding into generic JavaScript modal advice.",
+        "It treats the server response as HTML content for the modal."
+      ]
+    }
+  ]
+}

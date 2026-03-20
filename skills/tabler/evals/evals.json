@@ -1,0 +1,41 @@
+{
+  "skill_name": "tabler",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Build a Tabler settings page with cards, labeled form fields, and footer actions. Use real Tabler structure and classes, not approximate Bootstrap guesses.",
+      "expected_output": "The response uses actual Tabler component structure rather than generic HTML decorated with plausible-looking classes. The page layout, card structure, forms, and actions all follow real Tabler patterns.",
+      "files": [],
+      "expectations": [
+        "It uses real Tabler component structure such as card wrappers and card bodies.",
+        "It uses proper Tabler or Bootstrap form-label and form-control patterns instead of invented variants.",
+        "It keeps the guidance framework-agnostic rather than adding Django or HTMX specifics.",
+        "It avoids inventing nonexistent Tabler classes or component APIs."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Create a responsive user directory page with Tabler cards, avatars, badges, and split actions. I want something that would actually fit Tabler rather than a generic dashboard template.",
+      "expected_output": "The response composes real Tabler page patterns into a credible directory screen. It uses valid class combinations and responsive structure rather than a made-up design system.",
+      "files": [],
+      "expectations": [
+        "It uses recognizable Tabler layout and utility patterns.",
+        "It uses valid avatar, badge, and action-group structures rather than fabricated APIs.",
+        "It addresses responsiveness using real utility/layout mechanisms.",
+        "It stays within Tabler's visual language instead of inventing a totally unrelated design idiom."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Implement a data table with Tabler row actions and a modal entry point. Be precise about the HTML structure so it works as a Tabler page.",
+      "expected_output": "The response uses the correct Tabler table and modal structure instead of generic snippets. It keeps the table responsive and the modal integration aligned with Tabler's Bootstrap-based patterns.",
+      "files": [],
+      "expectations": [
+        "It uses a real Tabler table pattern, including responsiveness where appropriate.",
+        "It uses a valid modal structure rather than invented markup.",
+        "It keeps row actions consistent with Tabler button/dropdown conventions.",
+        "It avoids framework-specific implementation details outside Tabler's scope."
+      ]
+    }
+  ]
+}

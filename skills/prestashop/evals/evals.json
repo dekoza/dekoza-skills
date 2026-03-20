@@ -1,0 +1,41 @@
+{
+  "skill_name": "prestashop",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Build a PrestaShop 9 module settings page for an external newsletter service. It needs an API key field, a remote-group selector, save/load logic, and a generated cron URL for sync.",
+      "expected_output": "The response designs the module using real PrestaShop 9 architecture instead of improvising fake framework layers. It uses the modern admin configuration approach, keeps the main module class thin, and handles sync/cron concerns concretely.",
+      "files": [],
+      "expectations": [
+        "It uses a modern Symfony-based admin configuration flow rather than stuffing large HTML into `getContent()`.",
+        "It keeps the main module class thin and focused on registration/bootstrap concerns.",
+        "It treats the cron endpoint as machine-facing and protected rather than an admin-page side effect.",
+        "It avoids inventing PrestaShop framework classes or namespaces."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Review a PrestaShop module that syncs newsletter subscribers to a remote API and exposes a cron endpoint. I want architectural defects, data-model mistakes, and security problems called out plainly.",
+      "expected_output": "The response performs a real PrestaShop-aware review rather than a generic PHP review. It identifies architectural, persistence, and cron/security defects that matter for a PrestaShop 9 module.",
+      "files": [],
+      "expectations": [
+        "It calls out whether remote IDs are modeled explicitly instead of assuming email is always enough.",
+        "It treats cron security and authentication seriously.",
+        "It distinguishes front-office legacy controllers from modern back-office admin controllers correctly.",
+        "It avoids praising installation success as proof that the module architecture is sound."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Fix a PrestaShop 9 module that installs, but its config page routing is broken and the form save/load flow does not behave like a modern PS9 admin page.",
+      "expected_output": "The response fixes the broken architecture in PrestaShop terms. It routes the config page through the right modern admin path and restores a save/load flow that matches current PrestaShop expectations.",
+      "files": [],
+      "expectations": [
+        "It routes the configuration page through a modern Symfony admin flow.",
+        "It restores a coherent save/load cycle using real PrestaShop patterns.",
+        "It does not fall back to a giant inline legacy page render as the main fix.",
+        "It stays grounded in PrestaShop 9 rather than generic Symfony module advice."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "skill_name": "django",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Fix a Django queryset for a product listing page. It filters products by tags through a many-to-many relation, shows category data on every row, and is duplicating rows while also causing extra queries in the template.",
+      "expected_output": "The response fixes the queryset using Django-specific ORM discipline rather than generic Python refactoring. It addresses duplicate rows and N+1 behavior with the appropriate queryset methods.",
+      "files": [],
+      "expectations": [
+        "It uses `.distinct()` to address duplicates caused by filtering through the many-to-many relation.",
+        "It uses `select_related()` and/or `prefetch_related()` appropriately to address the N+1 access pattern.",
+        "It grounds the fix in actual Django ORM behavior rather than framework-agnostic advice.",
+        "It does not invent model fields without verifying them first."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Add a Django view that renders a product detail page, and make the response compatible with middleware that may need to modify template context before rendering.",
+      "expected_output": "The response chooses Django view and response patterns that fit the framework rather than merely producing HTML somehow. It uses the response type that preserves middleware opportunities and keeps the code aligned with Django conventions.",
+      "files": [],
+      "expectations": [
+        "It prefers `TemplateResponse` over `render()` for this middleware-sensitive page flow.",
+        "It structures the view using real Django request/response patterns.",
+        "It keeps framework behavior explicit rather than relying on vague pseudocode."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Write tests for a Django login-protected view that updates a record and sends an email. Be precise about which Django test base, fixtures, and assertions are appropriate.",
+      "expected_output": "The response uses Django testing tools intentionally rather than suggesting a generic test outline. It chooses the right test class or pytest-django setup, covers auth, the state change, and the email side effect.",
+      "files": [],
+      "expectations": [
+        "It chooses an appropriate Django testing base or pytest-django setup instead of a one-size-fits-all test class.",
+        "It covers the login-protection behavior, not just the happy-path update.",
+        "It checks the persisted state change and the email side effect explicitly.",
+        "It keeps the advice grounded in Django's testing ecosystem rather than generic unit-test talk."
+      ]
+    }
+  ]
+}
