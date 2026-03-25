@@ -1,0 +1,83 @@
+{
+  "expectations": [
+    {
+      "text": "It recommends AnyIO task groups instead of raw `asyncio.create_task()` for owned child work.",
+      "passed": true,
+      "evidence": "`outputs/response.md:3` maps `asyncio.create_task()` to `anyio.create_task_group()` with `tg.start_soon()` / `tg.start()`."
+    },
+    {
+      "text": "It recommends memory object streams over raw `asyncio.Queue()` for new portable designs.",
+      "passed": true,
+      "evidence": "`outputs/response.md:4` replaces `asyncio.Queue()` with `anyio.create_memory_object_stream()` and `outputs/response.md:17` says to model producer/consumer work with streams."
+    },
+    {
+      "text": "It replaces `asyncio.wait_for()` with AnyIO timeout/cancel-scope guidance rather than leaving it untouched.",
+      "passed": true,
+      "evidence": "`outputs/response.md:5` replaces `asyncio.wait_for()` with `anyio.fail_after()` / `anyio.move_on_after()`, and `outputs/response.md:18` says to put timeout policy at call boundaries with cancel scopes."
+    },
+    {
+      "text": "It explicitly states that tasks spawned by native backend libraries on backends other than Trio are not subject to AnyIO's cancellation rules.",
+      "passed": true,
+      "evidence": "`outputs/response.md:77` says vendor-spawned tasks remain native asyncio tasks, and `outputs/response.md:79` says `native tasks are not governed by AnyIO's cancellation rules the same way`."
+    },
+    {
+      "text": "It refuses to call the library fully portable while it still depends on an asyncio-native SDK that spawns its own tasks.",
+      "passed": true,
+      "evidence": "`outputs/response.md:75`-`outputs/response.md:77` says the SDK is not Trio-native and cannot be claimed as backend-portable, and `outputs/response.md:83`-`outputs/response.md:85` narrows the honest support matrix to core library on asyncio+Trio but vendor integration on asyncio only."
+    },
+    {
+      "text": "It requires verification on both asyncio and Trio rather than a single-backend test run.",
+      "passed": true,
+      "evidence": "`outputs/response.md:150`-`outputs/response.md:160` says to run the same contract tests on both `asyncio` and `trio`, with vendor adapter tests on asyncio only."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "skill": 1,
+      "webfetch": 4
+    },
+    "total_tool_calls": 5,
+    "total_steps": 3,
+    "files_created": [
+      "response.md",
+      "transcript.md",
+      "metrics.json"
+    ],
+    "errors_encountered": 0,
+    "output_chars": 6516,
+    "transcript_chars": 7365,
+    "skill_triggered": false,
+    "return_code": 0
+  },
+  "timing": {
+    "executor_duration_seconds": 53.581,
+    "total_duration_seconds": 53.581,
+    "duration_ms": 53581,
+    "total_tokens": 36098
+  },
+  "claims": [
+    {
+      "claim": "The response says the portable core should replace raw asyncio task, queue, and timeout primitives with AnyIO task groups, memory object streams, and cancel-scope timeouts.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "`outputs/response.md:3`-`outputs/response.md:5` gives the direct primitive-for-primitive redesign."
+    },
+    {
+      "claim": "The response says the asyncio-native vendor SDK keeps that integration asyncio-only rather than honestly Trio-portable.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "`outputs/response.md:73`-`outputs/response.md:85` says the SDK is not Trio-native and the honest support matrix is core on asyncio+Trio, vendor integration on asyncio only."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  }
+}

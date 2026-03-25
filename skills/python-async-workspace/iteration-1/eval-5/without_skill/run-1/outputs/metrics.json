@@ -1,0 +1,26 @@
+{
+  "eval_id": 5,
+  "mode": "without_skill",
+  "skill_loaded": false,
+  "repository_files_modified": false,
+  "outputs_created": [
+    "response.md",
+    "transcript.md",
+    "metrics.json"
+  ],
+  "assertions": {
+    "explains_gather_is_not_lifecycle_manager": true,
+    "catches_missing_strong_reference": true,
+    "challenges_harmless_detach_claim": true,
+    "proposes_taskgroup_or_owned_background_boundary": true,
+    "identifies_task_lifetime_as_primary_risk": true
+  },
+  "references": [
+    "https://docs.python.org/3/library/asyncio-task.html"
+  ],
+  "verification": {
+    "docs_checked": true,
+    "local_execution_performed": false,
+    "reason_local_execution_skipped": "The task was explanatory rather than repository-runtime-specific, so official asyncio documentation was the relevant verification source."
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "expectations": [
+    {
+      "text": "It says swallowing cancellation is a bug, not a style choice.",
+      "passed": true,
+      "evidence": "Line 3: 'cancellation is not a warning; it is the stop signal. If you swallow it, the task can keep running forever and the service hangs waiting for it to die.' and line 79: 'Highest-risk footgun: swallowing CancelledError and continuing the main loop. That is the classic shutdown hang.'"
+    },
+    {
+      "text": "It explains that cleanup should re-raise cancellation after running.",
+      "passed": true,
+      "evidence": "Line 74: 'Catch cancellation only to log or clean up, then re-raise it.' Code examples show 'raise' in except/finally blocks after cleanup."
+    },
+    {
+      "text": "It warns against using raw `asyncio.shield()` as the default fix.",
+      "passed": true,
+      "evidence": "Line 4: 'shield() does not make shutdown safe; it only prevents the inner awaitable from being cancelled by the outer await. The caller is still cancelled. That means you can orphan cleanup work, hide failures, or hang shutdown if the close never finishes.' and line 76: 'Never use shield() as a generic \"ignore shutdown\" switch.'"
+    },
+    {
+      "text": "It suggests bounded cleanup such as `move_on_after(..., shield=True)` or an equivalent backend-specific bounded pattern.",
+      "passed": true,
+      "evidence": "Lines 75-76: 'Shield only short, bounded finalization. Never use shield() as a generic \"ignore shutdown\" switch.' Code shows bounded cleanup pattern with asyncio.wait_for(asyncio.shield(close_task), timeout=5) and asyncio.wait_for(asyncio.shield(audit.flush()), timeout=2)."
+    },
+    {
+      "text": "It states that intentionally suppressing asyncio cancellation requires `uncancel()` to clear the task's cancellation state.",
+      "passed": true,
+      "evidence": "Line 5: 'suppressing CancelledError without uncancel() leaves the task poisoned' and line 77: 'If raw asyncio code intentionally suppresses cancellation, call uncancel() and re-raise after the bounded critical section.' Code at line 65 shows task.uncancel()."
+    },
+    {
+      "text": "It identifies cancellation semantics as the highest-risk issue.",
+      "passed": true,
+      "evidence": "Line 79: 'Highest-risk footgun: swallowing CancelledError and continuing the main loop. That is the classic shutdown hang.'"
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "skill": 1,
+      "read": 2
+    },
+    "total_tool_calls": 3,
+    "total_steps": 3,
+    "errors_encountered": 0,
+    "output_chars": 3521,
+    "transcript_chars": 4279,
+    "skill_triggered": true,
+    "return_code": 0
+  },
+  "timing": {
+    "executor_duration_seconds": 0.0,
+    "total_duration_seconds": 28.251,
+    "duration_ms": 28251,
+    "total_tokens": 69377
+  },
+  "claims": [],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  }
+}

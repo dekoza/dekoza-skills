@@ -1,0 +1,22 @@
+# Transcript
+
+- User task: explain why swallowing `CancelledError` and using raw `asyncio.shield()` can hang shutdown; provide a safer pattern.
+- Available local skill read manually from `skills/python-async/` because it is not registered in the tool-level skill list.
+- References used:
+  - `skills/python-async/SKILL.md`
+  - `skills/python-async/references/cancellation-timeouts.md`
+  - `skills/python-async/references/structured-concurrency.md`
+  - `skills/python-async/references/backend-asyncio.md`
+- Key verified points from the skill:
+  - swallowing cancellation is a bug
+  - cleanup should re-raise cancellation after it runs
+  - raw `asyncio.shield()` is not the default fix
+  - shielding should be narrow and bounded
+  - cancellation semantics are the highest-risk part of shutdown behavior
+- Produced `response.md` with:
+  - explicit `asyncio-specific` classification
+  - source references named in the answer
+  - explanation of the broken worker loop
+  - warning about orphaned or unbounded cleanup from raw `asyncio.shield()`
+  - safer bounded-cleanup examples for AnyIO and plain `asyncio`
+  - a minimum verification step for shutdown tests

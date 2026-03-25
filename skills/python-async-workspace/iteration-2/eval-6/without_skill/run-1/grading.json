@@ -1,0 +1,113 @@
+{
+  "expectations": [
+    {
+      "text": "It says nested `asyncio.run()` under a running loop is invalid.",
+      "passed": true,
+      "evidence": "`response.md` says `asyncio.run()` inside library methods `explodes if the current thread already has a running loop` and later says `if a framework loop is already running ... a sync wrapper cannot safely block there`."
+    },
+    {
+      "text": "It distinguishes AnyIO worker threads from foreign threads.",
+      "passed": true,
+      "evidence": "The response separates `AnyIO worker thread created by anyio.to_thread.run_sync(...)` from `a foreign thread that was not created by AnyIO`, and the decision table keeps them as separate cases."
+    },
+    {
+      "text": "It introduces `BlockingPortal` or token-based access for sync-to-async bridging.",
+      "passed": true,
+      "evidence": "The response recommends both `current_token() + from_thread.run(..., token=token)` and `BlockingPortal` / `BlockingPortalProvider` for foreign-thread bridging."
+    },
+    {
+      "text": "It states that `from_thread.run()` / `from_thread.run_sync()` work directly only from AnyIO worker threads spawned via `to_thread.run_sync()`.",
+      "passed": false,
+      "evidence": "It explicitly says `anyio.from_thread.run(...)` is for `an AnyIO worker thread created by anyio.to_thread.run_sync(...)`, but it never makes the same explicit statement for `from_thread.run_sync()`. The expectation requires both forms or an equally explicit combined statement."
+    },
+    {
+      "text": "It mentions `current_token()` as the lighter one-off bridge for foreign threads.",
+      "passed": true,
+      "evidence": "The response says ``current_token() + from_thread.run(..., token=token)`` is for `a one-off call from a foreign thread` and the decision table repeats `foreign thread, one-off -> token + from_thread.run()`."
+    },
+    {
+      "text": "It does not promise that cancelling the caller will stop arbitrary worker-thread code.",
+      "passed": false,
+      "evidence": "The response never discusses cancellation behavior for worker-thread code at all. There is no statement that cancellation does not stop arbitrary thread execution, so this cannot pass on the available evidence."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 2,
+    "total": 6,
+    "pass_rate": 0.6666666666666666
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "skill": 1,
+      "webfetch": 2
+    },
+    "total_tool_calls": 3,
+    "total_steps": 3,
+    "files_created": [
+      "response.md",
+      "transcript.md",
+      "metrics.json"
+    ],
+    "errors_encountered": 0,
+    "output_chars": 3974,
+    "transcript_chars": 4710,
+    "skill_triggered": false,
+    "return_code": 0
+  },
+  "timing": {
+    "executor_duration_seconds": 44.591,
+    "grader_duration_seconds": null,
+    "total_duration_seconds": 44.591,
+    "total_tokens": 40729
+  },
+  "claims": [
+    {
+      "claim": "`asyncio.run()` cannot be called when another event loop is already running in the same thread.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Python docs for `asyncio.run()` state: `This function cannot be called when another asyncio event loop is running in the same thread.` The response matches that claim."
+    },
+    {
+      "claim": "`from_thread.run()` works directly from an AnyIO worker thread spawned via `to_thread.run_sync()`.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "AnyIO docs say: `The worker thread must have been spawned using run_sync() for this to work.` The response states this explicitly for `from_thread.run(...)`."
+    },
+    {
+      "claim": "`current_token()` is a suitable one-off bridge for foreign threads.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "AnyIO docs list obtaining an event loop token from `current_token()` and passing it to `from_thread.run()` / `run_sync()` as one of the two supported foreign-thread access patterns."
+    },
+    {
+      "claim": "`BlockingPortalProvider` lets multiple sync threads share one blocking portal instead of starting a new portal per call.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "AnyIO docs say `no matter how many threads call ... the same blocking portal will be used`, matching the response's claim about reusing one stable boundary."
+    },
+    {
+      "claim": "Cancelling the caller will stop arbitrary worker-thread code.",
+      "type": "quality",
+      "verified": false,
+      "evidence": "The response does not make this promise, and AnyIO docs say with `to_thread.run_sync()` the thread will still continue running unless user code cooperatively checks cancellation."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "It does not promise that cancelling the caller will stop arbitrary worker-thread code.",
+        "reason": "This negative assertion is valid, but it would be more discriminating as a positive check requiring the answer to state that worker threads keep running unless the code cooperatively checks cancellation (for example via `from_thread.check_cancelled()`)."
+      },
+      {
+        "reason": "No assertion checks the loop-thread failure mode explicitly: a sync wrapper called on the already-running event-loop thread must not block there and should direct the caller to stay async or hop to a worker thread. That is a core boundary-design requirement in this prompt."
+      }
+    ],
+    "overall": "The eval is mostly solid, but it under-specifies cancellation semantics and misses the loop-thread boundary hazard that separates a merely plausible answer from a correct one."
+  }
+}

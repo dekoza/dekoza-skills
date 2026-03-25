@@ -1,0 +1,12 @@
+{
+  "eval_id": 1,
+  "eval_name": "eval-1",
+  "prompt": "I maintain a Python library that currently uses `asyncio.create_task()`, `asyncio.Queue()`, and `asyncio.wait_for()` directly. I want the core API to run on both asyncio and Trio without lying about portability. Show the right redesign direction under AnyIO and call out the places where native backend details still matter.",
+  "assertions": [
+    "It labels the answer as `AnyIO-portable` and names the references used.",
+    "It recommends AnyIO task groups instead of raw `asyncio.create_task()` for owned child work.",
+    "It recommends memory object streams over raw `asyncio.Queue()` for new portable designs.",
+    "It distinguishes portable library logic from backend-native runtime details instead of pretending everything is identical.",
+    "It states a verification step that includes running tests on both asyncio and Trio."
+  ]
+}

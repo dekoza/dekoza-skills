@@ -1,0 +1,30 @@
+{
+  "eval_id": 3,
+  "eval_name": "eval-3",
+  "skill_requested": "python-async",
+  "skill_source_path": "/home/minder/projekty/oh-my-slop/skills/python-async/SKILL.md",
+  "skill_tool_loaded": false,
+  "answer_mode": "AnyIO-portable",
+  "references_used": [
+    "references/testing.md",
+    "references/backend-uvloop.md",
+    "references/decision-matrix.md"
+  ],
+  "output_files": [
+    "response.md",
+    "transcript.md",
+    "metrics.json"
+  ],
+  "assertion_results": {
+    "mentions_anyio_vs_pytest_asyncio_auto_conflict": true,
+    "provides_concrete_anyio_backend_fixture_or_equivalent": true,
+    "includes_trio_and_plain_asyncio_in_matrix": true,
+    "treats_asyncio_plus_uvloop_as_additional_runtime_axis": true,
+    "names_references_and_verification_strategy": true
+  },
+  "notes": [
+    "The response recommends AnyIO auto mode with pytest-asyncio strict mode.",
+    "The response explicitly states that uvloop is still asyncio and does not replace Trio coverage.",
+    "The built-in skill loader could not load the repo-local skill, so repository skill files were read directly."
+  ]
+}

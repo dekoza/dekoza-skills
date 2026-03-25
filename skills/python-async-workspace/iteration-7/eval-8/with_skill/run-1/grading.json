@@ -1,0 +1,73 @@
+{
+  "expectations": [
+    {
+      "text": "It recommends `TaskGroup.start()` instead of a guessed sleep for readiness.",
+      "passed": true,
+      "evidence": "Line 1: 'Use TaskGroup.start(). Sleeping for 0.1 is a race, not a readiness protocol.' Line 28: 'await tg.start(serve_tcp, 5000)  # blocks until child signals readiness'"
+    },
+    {
+      "text": "It states that the started task must call `task_status.started()`.",
+      "passed": true,
+      "evidence": "Line 23: 'task_status.started()  # signal only after bind/listen succeeded'"
+    },
+    {
+      "text": "It says `TaskGroup.start()` raises `RuntimeError` if the child exits without calling `task_status.started()`.",
+      "passed": true,
+      "evidence": "Line 36: 'If the child exits without calling task_status.started(), start() raises RuntimeError.' Line 38-39: 'RuntimeError(\"Child exited without calling task_status.started()\")'"
+    },
+    {
+      "text": "It says `TaskGroup.start()` stays blocked until cancellation if the child keeps running without calling `task_status.started()`.",
+      "passed": true,
+      "evidence": "Line 42: 'If the child does not call started() and also does not exit, start() does not magically fail fast; it stays blocked until the task exits or you cancel/time out the wait.'"
+    },
+    {
+      "text": "It explains that the sleep-based pattern is hiding a startup handshake bug rather than solving it.",
+      "passed": true,
+      "evidence": "Line 1: 'Sleeping for 0.1 is a race, not a readiness protocol.' Line 43: 'the broken code path is worse than flaky'"
+    },
+    {
+      "text": "It explains that `start()` surfaces startup failures or bind errors immediately instead of turning them into later connection races.",
+      "passed": true,
+      "evidence": "Line 35: 'If bind/listen fails before readiness, await tg.start(...) raises that real exception to the parent immediately.'"
+    },
+    {
+      "text": "It keeps the answer in AnyIO structured-concurrency terms instead of drifting into generic retry advice.",
+      "passed": true,
+      "evidence": "The entire response uses AnyIO APIs (create_task_group, TaskStatus, TASK_STATUS_IGNORED, create_tcp_listener, connect_tcp) and discusses structured-concurrency semantics. No generic retry advice appears."
+    }
+  ],
+  "summary": {
+    "passed": 7,
+    "failed": 0,
+    "total": 7,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "skill": 1,
+      "read": 1,
+      "grep": 1,
+      "bash": 1,
+      "webfetch": 3
+    },
+    "total_tool_calls": 7,
+    "total_steps": 5,
+    "errors_encountered": 0,
+    "output_chars": 1957,
+    "transcript_chars": 2844,
+    "skill_triggered": true,
+    "return_code": 0
+  },
+  "timing": {
+    "executor_duration_seconds": 0.0,
+    "total_duration_seconds": 37.102,
+    "duration_ms": 37102,
+    "total_tokens": 140402
+  },
+  "claims": [],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  }
+}

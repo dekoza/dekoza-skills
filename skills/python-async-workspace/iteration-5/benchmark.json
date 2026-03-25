@@ -1,0 +1,917 @@
+{
+  "metadata": {
+    "skill_name": "python-async",
+    "skill_path": "/home/minder/projekty/oh-my-slop/skills/python-async",
+    "executor_model": "github-copilot/gpt-5.4",
+    "analyzer_model": "inline-manual",
+    "timestamp": "2026-03-25T16:06:21Z",
+    "evals_run": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 71.863,
+        "tokens": 4319,
+        "tool_calls": 10,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "It recommends AnyIO task groups instead of raw `asyncio.create_task()` for owned child work.",
+          "passed": true,
+          "evidence": "`outputs/response.md` says `asyncio.create_task() -> anyio.create_task_group()` and later explains: `Use task groups so spawned work has an owner, shutdown path, and sibling-cancellation semantics.`"
+        },
+        {
+          "text": "It recommends memory object streams over raw `asyncio.Queue()` for new portable designs.",
+          "passed": true,
+          "evidence": "`outputs/response.md` says `asyncio.Queue() -> anyio.create_memory_object_stream()` and adds `Use memory object streams so backpressure is part of the contract instead of an accidental queue detail.`"
+        },
+        {
+          "text": "It replaces `asyncio.wait_for()` with AnyIO timeout/cancel-scope guidance rather than leaving it untouched.",
+          "passed": true,
+          "evidence": "`outputs/response.md` maps `asyncio.wait_for()` to `anyio.fail_after()` or `anyio.move_on_after()` and explains when each timeout pattern applies."
+        },
+        {
+          "text": "It explicitly states that tasks spawned by native backend libraries on backends other than Trio are not subject to AnyIO's cancellation rules.",
+          "passed": true,
+          "evidence": "`outputs/response.md` says `Even on the asyncio backend, SDK-spawned raw tasks are outside your AnyIO task tree unless the SDK gives you a real shutdown/join API.` That is an explicit statement that the vendor's native asyncio tasks sit outside AnyIO-managed cancellation/ownership."
+        },
+        {
+          "text": "It refuses to call the library fully portable while it still depends on an asyncio-native SDK that spawns its own tasks.",
+          "passed": true,
+          "evidence": "The response opens with `That would be false portability` and says the SDK adapter is `clearly not Trio-portable`, with the vendor SDK described as `the big lie detector`."
+        },
+        {
+          "text": "It requires verification on both asyncio and Trio rather than a single-backend test run.",
+          "passed": true,
+          "evidence": "`outputs/response.md` says `Minimum test bar if you want to claim portability: run core tests on both asyncio and Trio` and separately keeps vendor-adapter tests on `asyncio` only."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 46.981,
+        "tokens": 3913,
+        "tool_calls": 3,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "It says swallowing cancellation is a bug, not a style choice.",
+          "passed": true,
+          "evidence": "The response says the worker that catches `CancelledError` and keeps looping is 'wrong' and later makes it explicit: '`except asyncio.CancelledError: ... continue` is a shutdown bug.'"
+        },
+        {
+          "text": "It explains that cleanup should re-raise cancellation after running.",
+          "passed": true,
+          "evidence": "The safer-pattern bullets say 'Re-raise cancellation after cleanup,' and both code examples end cancellation handling with `finally: raise`."
+        },
+        {
+          "text": "It warns against using raw `asyncio.shield()` as the default fix.",
+          "passed": true,
+          "evidence": "The response states: 'The `asyncio.shield()` cleanup is also wrong as a default pattern,' and explains that it can leave close work running in the background without a time bound."
+        },
+        {
+          "text": "It suggests bounded cleanup such as `move_on_after(..., shield=True)` or an equivalent backend-specific bounded pattern.",
+          "passed": true,
+          "evidence": "It proposes an asyncio-specific bounded pattern: create a close task, then `async with asyncio.timeout(seconds): await asyncio.shield(close_task)`, and cancel the close task if the timeout expires."
+        },
+        {
+          "text": "It states that intentionally suppressing asyncio cancellation requires `uncancel()` to clear the task's cancellation state.",
+          "passed": true,
+          "evidence": "The response says that if you suppress `CancelledError` and continue, 'you must also clear the task's cancellation state with `uncancel()`,' and the example calls `task.uncancel()` with the note 'clears poisoned state'."
+        },
+        {
+          "text": "It identifies cancellation semantics as the highest-risk issue.",
+          "passed": true,
+          "evidence": "The answer has a dedicated 'Highest-risk footgun' section focused entirely on cancellation misuse: swallowed `CancelledError` and unbounded `asyncio.shield()`."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 91.42,
+        "tokens": 3951,
+        "tool_calls": 5,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "It explicitly mentions the AnyIO vs `pytest-asyncio` auto-mode conflict.",
+          "passed": true,
+          "evidence": "`response.md:1` says two auto modes cannot coexist, and `response.md:20`/`response.md:105` explicitly rejects mixed auto mode: 'Do not leave both AnyIO and `pytest-asyncio` in auto mode.'"
+        },
+        {
+          "text": "It provides a concrete `anyio_backend` fixture or equivalent configuration.",
+          "passed": true,
+          "evidence": "`response.md:43-46` defines an `anyio_backend` fixture, `response.md:56-59` shows explicit parametrization over `ANYIO_BACKENDS`, and `response.md:73-75` gives a higher-scope `anyio_backend` fixture for the module-scoped case."
+        },
+        {
+          "text": "It includes Trio and plain asyncio in the serious portability matrix.",
+          "passed": true,
+          "evidence": "`response.md:32-35` includes `('asyncio', {'use_uvloop': False})` and `('trio', {})`, and `response.md:115-122` says to run important portable tests on `trio` and plain `asyncio` across the CI matrix."
+        },
+        {
+          "text": "It treats `asyncio+uvloop` as an additional runtime axis rather than a substitute for Trio coverage.",
+          "passed": true,
+          "evidence": "`response.md:62` says the matrix should cover important tests only, `response.md:107` says 'Do not treat `uvloop` as a third async model', and `response.md:119-122` lists `asyncio+uvloop` only as an extra Linux/CPython axis alongside `asyncio` and `trio`."
+        },
+        {
+          "text": "It explicitly states that a higher-scope async fixture needs a matching higher-scope `anyio_backend` fixture.",
+          "passed": true,
+          "evidence": "`response.md:65` says the module-scoped TCP listener is a trap 'unless `anyio_backend` has matching scope', and `response.md:73-79` shows a module-scoped `anyio_backend` fixture paired with a module-scoped async fixture."
+        },
+        {
+          "text": "It explicitly mentions that AnyIO's test runner keeps async fixtures and tests in the same task, so `contextvars` can leak within that runner.",
+          "passed": true,
+          "evidence": "`response.md:90` states 'AnyIO runs async fixtures and tests in the same task for that runner. If tests mutate `contextvars`, they can leak.'"
+        },
+        {
+          "text": "It gates any uvloop test axis to supported CPython/POSIX runtimes instead of enabling it unconditionally on Windows or PyPy.",
+          "passed": true,
+          "evidence": "`response.md:37-40` adds `asyncio+uvloop` only when not on Windows and running CPython, `response.md:108` says not to enable uvloop on Windows or PyPy, and `response.md:120-122` omits uvloop from the Windows and PyPy matrix entries."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 4,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 51.465,
+        "tokens": 2623,
+        "tool_calls": 5,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "It says `uvloop` is an asyncio event loop implementation, not a third async model.",
+          "passed": true,
+          "evidence": "`response.md:7` states: '`uvloop` is an `asyncio` event loop implementation, not a correctness feature, not a portability layer...'"
+        },
+        {
+          "text": "It rejects putting uvloop policy decisions into a portable library API.",
+          "passed": true,
+          "evidence": "`response.md:7-9` says a reusable public library should not force uvloop and that the host application, not the library, owns loop choice; `response.md:53-55` adds 'don't enable `uvloop` inside the library import path'."
+        },
+        {
+          "text": "It recommends app/runtime-level integration such as `uvloop.run()` or `asyncio.Runner(loop_factory=uvloop.new_event_loop)`.",
+          "passed": true,
+          "evidence": "`response.md:18-40` gives both recommended wiring patterns: `uvloop.run(main())` and `asyncio.Runner(loop_factory=uvloop.new_event_loop)`."
+        },
+        {
+          "text": "It does not claim uvloop helps Trio.",
+          "passed": true,
+          "evidence": "The answer consistently constrains uvloop to asyncio: `response.md:7` calls it an `asyncio` event loop implementation and `response.md:42-50` only mentions uvloop under 'For AnyIO on the `asyncio` backend'; there is no Trio-performance claim anywhere in the output."
+        },
+        {
+          "text": "It explicitly gates uvloop recommendations by supported CPython/POSIX runtimes rather than implying universal applicability.",
+          "passed": true,
+          "evidence": "`response.md:8` says uvloop is 'a POSIX/macOS runtime option, not a universal baseline' in the context of Windows developers and multi-CPython support, and `response.md:55` notes deprecated policy APIs with Python 3.16 implications."
+        },
+        {
+          "text": "It explicitly says not to recommend or require uvloop on unsupported platforms such as Windows.",
+          "passed": true,
+          "evidence": "`response.md:8` directly treats Windows support as a reason not to auto-enable uvloop, calling it 'a POSIX/macOS runtime option, not a universal baseline.' That is an explicit platform gate against recommending it as a requirement for Windows users."
+        },
+        {
+          "text": "It requires benchmarking or deployment justification before recommending uvloop.",
+          "passed": true,
+          "evidence": "`response.md:9` says the host application owns 'deployment target, and benchmark evidence'; `response.md:15` lists 'perf benchmarks' as where uvloop belongs; `response.md:56` says not to sell uvloop as automatic better performance 'without benchmarks'."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 5,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 8,
+        "failed": 0,
+        "total": 8,
+        "time_seconds": 60.694,
+        "tokens": 5880,
+        "tool_calls": 5,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "It explains that `gather()` is not a lifecycle manager when sibling ownership matters.",
+          "passed": true,
+          "evidence": "The response says that `asyncio.gather()` gives concurrency rather than ownership and later narrows its use to cases where aggregate results are acceptable despite weaker failure semantics. That directly treats `gather()` as the wrong primitive for sibling lifecycle ownership."
+        },
+        {
+          "text": "It catches the missing strong reference for the detached asyncio task.",
+          "passed": true,
+          "evidence": "It explicitly warns that a bare `create_task()` with no stored reference is unsafe and cites the Python docs point that the loop keeps only weak references, so the task can disappear mid-execution."
+        },
+        {
+          "text": "It challenges the claim that the work is harmlessly detached unless ownership is explicit.",
+          "passed": true,
+          "evidence": "The opening frames the pattern as fire-and-hope rather than harmless detachment, and says returning before completion while closing over request-scoped objects creates use-after-lifetime bugs and undefined shutdown behavior."
+        },
+        {
+          "text": "It warns that eager task factory or `eager_start` changes execution semantics and is not a free performance fix for broken ownership.",
+          "passed": true,
+          "evidence": "It states that `eager_start` or the eager task factory is a semantic change, not a free optimization, and explains that it may run immediately during `create_task(...)`, changing ordering, error timing, lock contention, and tracing behavior."
+        },
+        {
+          "text": "It says detached work should receive plain data or payload snapshots rather than the `request` object, DB session, tracing span, or other request-bound resources.",
+          "passed": true,
+          "evidence": "The redesign says true post-response work should hand off plain data to an app-owned background worker and later emphasizes that the request handler passes a data snapshot rather than live request objects, while the worker owns its own DB session and span."
+        },
+        {
+          "text": "It proposes a task-group-based design or a clearly owned background worker boundary.",
+          "passed": true,
+          "evidence": "It provides both: a request-scoped `asyncio.TaskGroup` example and a separate `AuditDispatcher` queue plus supervised worker for post-response work."
+        },
+        {
+          "text": "If it proposes an owned background boundary, it makes that boundary concrete by mentioning task references, failure observation, and an admission or shutdown policy such as reject, buffer, drain, or durable handoff.",
+          "passed": true,
+          "evidence": "The `AuditDispatcher` stores `self._worker_task`, reports exceptions via `report_background_failure(job)`, uses a bounded queue (`maxsize=1000`) for admission and backpressure, and calls for explicit shutdown behavior with tests proving the worker drains, rejects, or drops according to policy. It also mentions a durable queue or outbox handoff when reliability matters."
+        },
+        {
+          "text": "It identifies task lifetime as the primary risk.",
+          "passed": true,
+          "evidence": "It explicitly says the highest-risk issue is detached work using request-owned resources after the request lifetime ends."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 6,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8888888889,
+        "passed": 8,
+        "failed": 1,
+        "total": 9,
+        "time_seconds": 64.249,
+        "tokens": 4741,
+        "tool_calls": 6,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "It says nested `asyncio.run()` under a running loop is invalid.",
+          "passed": true,
+          "evidence": "The response opens with: \"`asyncio.run()` cannot be nested under an already-running loop\" and later repeats \"never put `asyncio.run()` inside library methods.\""
+        },
+        {
+          "text": "It distinguishes AnyIO worker threads from foreign threads.",
+          "passed": true,
+          "evidence": "The answer separates \"If the thread came from `anyio.to_thread.run_sync()`, use `from_thread.run_sync()`\" from \"If it is a foreign thread, use a token for a one-off callback.\""
+        },
+        {
+          "text": "It introduces `BlockingPortal` or token-based access for sync-to-async bridging.",
+          "passed": true,
+          "evidence": "It recommends \"legacy sync code uses one shared `BlockingPortal`\" via `BlockingPortalProvider`, and for foreign threads it shows `current_token()` with `from_thread.run_sync(...)`."
+        },
+        {
+          "text": "It states that `from_thread.run()` / `from_thread.run_sync()` work directly only from AnyIO worker threads spawned via `to_thread.run_sync()`.",
+          "passed": true,
+          "evidence": "The worker-thread guidance is explicitly scoped to \"If the thread came from `anyio.to_thread.run_sync()`, use `from_thread.run_sync()`\", while foreign threads are given a different token-based path instead of direct use."
+        },
+        {
+          "text": "It distinguishes `from_thread.run()` for async callables from `from_thread.run_sync()` for loop-thread sync callbacks such as setting an AnyIO `Event`.",
+          "passed": false,
+          "evidence": "The response demonstrates `from_thread.run_sync(event.set)` for the sync callback case, but it never explicitly explains that `from_thread.run()` is the async-callable variant. The final rule set groups `from_thread.run()` / `from_thread.run_sync()` together without distinguishing callable type."
+        },
+        {
+          "text": "It mentions `current_token()` as the lighter one-off bridge for foreign threads.",
+          "passed": true,
+          "evidence": "The foreign-thread example imports `current_token`, passes it into `from_thread.run_sync(event.set, token=token)`, and the rule set says \"foreign thread, one-off hop -> `current_token()` + `from_thread.run()` / `run_sync()`.\""
+        },
+        {
+          "text": "It mentions `from_thread.check_cancelled()` for cooperative cancellation in long-running worker-thread code.",
+          "passed": true,
+          "evidence": "The long-running sync example says \"the sync code must poll `from_thread.check_cancelled()`\" and shows it inside `blocking_job()`."
+        },
+        {
+          "text": "It does not recommend `BlockingPortal` for a one-off callback from an AnyIO worker thread when `from_thread.run()` or `from_thread.run_sync()` is enough.",
+          "passed": true,
+          "evidence": "It explicitly says \"Do not open a portal for this\" for the worker-thread event callback, and later says \"Do not use it for: one-off calls from an AnyIO worker thread; use `from_thread.run()` / `from_thread.run_sync()`.\""
+        },
+        {
+          "text": "It does not promise that cancelling the caller will stop arbitrary worker-thread code.",
+          "passed": true,
+          "evidence": "The answer states \"`abandon_on_cancel=True` lets the async caller stop waiting\", but \"it does not stop the thread by itself\" and warns that a non-polling sync job \"can keep running forever in the background.\""
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 7,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 40.386,
+        "tokens": 3502,
+        "tool_calls": 4,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "It states that memory object streams default to buffer size `0`, rather than assuming queue-like buffering.",
+          "passed": true,
+          "evidence": "`outputs/response.md` says: '`create_memory_object_stream()` default buffering is `0`, not \"some small queue\".'"
+        },
+        {
+          "text": "It warns that using `math.inf` for an unbounded buffer is available but not recommended.",
+          "passed": true,
+          "evidence": "`outputs/response.md` says: 'In AnyIO, `math.inf` makes the stream unbounded and the docs explicitly recommend against it.'"
+        },
+        {
+          "text": "It says AnyIO events are single-use and should not be reused like standard-library events.",
+          "passed": true,
+          "evidence": "`outputs/response.md` says: '`Event` reuse is wrong in AnyIO. Events are single-use, not resettable gates.'"
+        },
+        {
+          "text": "It mentions that AnyIO's async test runner executes fixtures and tests in the same task, so `contextvars` can leak within that runner.",
+          "passed": true,
+          "evidence": "`outputs/response.md` says: 'in AnyIO tests, async fixtures and tests run in the same task, so context can leak between tests unless you reset it explicitly.'"
+        },
+        {
+          "text": "It does not collapse the answer into generic semaphore/queue advice divorced from AnyIO semantics.",
+          "passed": true,
+          "evidence": "The response stays anchored on AnyIO-specific primitives and behavior: `create_memory_object_stream()`, `Event`, higher-scope `anyio_backend`, spawned-task `contextvars`, and stream close semantics. It does not drift into generic semaphore advice."
+        },
+        {
+          "text": "It gives a concrete verification step that would exercise buffering, shutdown, or fixture leakage behavior.",
+          "passed": true,
+          "evidence": "`outputs/response.md` includes concrete checks under 'Minimum verification': 'write tests that intentionally overproduce into the stream', 'run two tests back-to-back that seed different contextvar values', and 'assert a fresh `Event` is required per run'."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 8,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 53.467,
+        "tokens": 2512,
+        "tool_calls": 7,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "It recommends `TaskGroup.start()` instead of a guessed sleep for readiness.",
+          "passed": true,
+          "evidence": "`response.md` says `Use the readiness handshake AnyIO already gives you` and shows `await tg.start(serve_tcp, 5000)` immediately after calling the sleep pattern `wrong` and `a race`."
+        },
+        {
+          "text": "It states that the started task must call `task_status.started()`.",
+          "passed": true,
+          "evidence": "Both code examples call `task_status.started(...)`, and the text says `If you need to return bound info, signal it through started()`."
+        },
+        {
+          "text": "It mentions that `TaskGroup.start()` raises `RuntimeError` if the child never signals readiness.",
+          "passed": true,
+          "evidence": "The response states: `If the child exits normally without ever calling task_status.started(), await tg.start(...) raises RuntimeError(\"Child exited without calling task_status.started()\") on the asyncio backend.` It also adds the missing nuance that a non-exiting child hangs instead of raising immediately."
+        },
+        {
+          "text": "It explains that the sleep-based pattern is hiding a startup handshake bug rather than solving it.",
+          "passed": true,
+          "evidence": "`response.md` opens with `The sleep(0.1) pattern is wrong. It is a race` and later says `That last case is the footgun ... start() hangs, it does not magically detect the omission.`"
+        },
+        {
+          "text": "It explains that `start()` surfaces startup failures or bind errors immediately instead of turning them into later connection races.",
+          "passed": true,
+          "evidence": "The response says: `If the child raises before calling task_status.started(), await tg.start(...) raises that original exception.` That covers startup failures at bind/startup time instead of deferring them into later connection-race symptoms."
+        },
+        {
+          "text": "It keeps the answer in AnyIO structured-concurrency terms instead of drifting into generic retry advice.",
+          "passed": true,
+          "evidence": "The answer stays focused on `create_task_group()`, `TaskGroup.start()`, `task_status.started()`, and listener startup semantics. It does not suggest generic retry loops or backoff as the fix."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8333333333333334,
+        "passed": 5,
+        "failed": 1,
+        "total": 6,
+        "time_seconds": 75.95,
+        "tokens": 6676,
+        "tool_calls": 7,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "It recommends AnyIO task groups instead of raw `asyncio.create_task()` for owned child work.",
+          "passed": true,
+          "evidence": "`outputs/response.md:14` says ``asyncio.create_task(...) -> anyio.create_task_group() + tg.start_soon(...)``, which is the requested redesign for owned child work."
+        },
+        {
+          "text": "It recommends memory object streams over raw `asyncio.Queue()` for new portable designs.",
+          "passed": true,
+          "evidence": "`outputs/response.md:16` introduces `AnyIO memory object streams`, and `outputs/response.md:17` shows `anyio.create_memory_object_stream[T](max_buffer_size)`."
+        },
+        {
+          "text": "It replaces `asyncio.wait_for()` with AnyIO timeout/cancel-scope guidance rather than leaving it untouched.",
+          "passed": true,
+          "evidence": "`outputs/response.md:19` says `Replace asyncio.wait_for(...) with cancel scopes`, then `outputs/response.md:20` and `outputs/response.md:21` recommend `anyio.fail_after(...)` and `anyio.move_on_after(...)`."
+        },
+        {
+          "text": "It explicitly states that tasks spawned by native backend libraries on backends other than Trio are not subject to AnyIO's cancellation rules.",
+          "passed": false,
+          "evidence": "The response clearly says the vendor SDK is `backend-specific` and `not Trio-compatible` at `outputs/response.md:92` and `outputs/response.md:124`, but it never explicitly states the narrower claim that vendor-spawned native tasks are outside AnyIO's cancellation rules. The closest cancellation note at `outputs/response.md:76`-`outputs/response.md:77` discusses swallowed `CancelledError`, not cancellation ownership of vendor-spawned tasks."
+        },
+        {
+          "text": "It refuses to call the library fully portable while it still depends on an asyncio-native SDK that spawns its own tasks.",
+          "passed": true,
+          "evidence": "`outputs/response.md:92` says the asyncio-native SDK is `not Trio-compatible just because your outer API uses AnyIO`, and `outputs/response.md:107` warns not to claim `supports Trio` while that code path still depends on the asyncio-only SDK."
+        },
+        {
+          "text": "It requires verification on both asyncio and Trio rather than a single-backend test run.",
+          "passed": true,
+          "evidence": "`outputs/response.md:124` says to `run core tests under both asyncio and trio`, and `outputs/response.md:155` repeats that the core test suite should run under both AnyIO backends."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.83,
+        "passed": 5,
+        "failed": 1,
+        "total": 6,
+        "time_seconds": 30.082,
+        "tokens": 2818,
+        "tool_calls": 2,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "It says swallowing cancellation is a bug, not a style choice.",
+          "passed": true,
+          "evidence": "`outputs/response.md:3` says catching `CancelledError` and continuing the loop is `wrong`, and says `swallowing it makes the task refuse to die` rather than treating it as a stylistic preference."
+        },
+        {
+          "text": "It explains that cleanup should re-raise cancellation after running.",
+          "passed": true,
+          "evidence": "`outputs/response.md:26` says to `prefer bounded best-effort cleanup and then propagate cancellation`, and `outputs/response.md:49-51` shows `except asyncio.CancelledError: ... raise` after cleanup-related shielding."
+        },
+        {
+          "text": "It warns against using raw `asyncio.shield()` as the default fix.",
+          "passed": true,
+          "evidence": "`outputs/response.md:4` says `asyncio.shield()` does not make the caller uncancelled and can leave `a half-detached cleanup task still running during shutdown`, which is a direct warning against treating raw shielding as the default solution."
+        },
+        {
+          "text": "It suggests bounded cleanup such as `move_on_after(..., shield=True)` or an equivalent backend-specific bounded pattern.",
+          "passed": true,
+          "evidence": "`outputs/response.md:35-36` uses `asyncio.timeout(5)` around `resource.aclose()`, and `outputs/response.md:47-48` uses `asyncio.timeout(5)` around a shielded close task. That is an equivalent bounded asyncio-specific pattern."
+        },
+        {
+          "text": "It states that intentionally suppressing asyncio cancellation requires `uncancel()` to clear the task's cancellation state.",
+          "passed": true,
+          "evidence": "`outputs/response.md:5` says `you must also clear that state with Task.uncancel()`, and `outputs/response.md:63` shows `task.uncancel()` in the asyncio-only suppression example."
+        },
+        {
+          "text": "It identifies cancellation semantics as the highest-risk issue.",
+          "passed": false,
+          "evidence": "The response is centered on cancellation problems, but it never explicitly says cancellation semantics are the highest-risk issue or otherwise clearly ranks them above the other shutdown concerns. The evidence shows focus, not an explicit priority claim."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.86,
+        "passed": 6,
+        "failed": 1,
+        "total": 7,
+        "time_seconds": 123.475,
+        "tokens": 4397,
+        "tool_calls": 8,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "It explicitly mentions the AnyIO vs `pytest-asyncio` auto-mode conflict.",
+          "passed": true,
+          "evidence": "`outputs/response.md:1` says `Both plugins in auto mode is the bug. In a mixed AnyIO + pytest-asyncio suite, that setup is wrong and flaky by design.`"
+        },
+        {
+          "text": "It provides a concrete `anyio_backend` fixture or equivalent configuration.",
+          "passed": true,
+          "evidence": "`outputs/response.md:50-52` defines `@pytest.fixture(params=ANYIO_BACKENDS)` and `def anyio_backend(request): return request.param`, which is a concrete `anyio_backend` fixture."
+        },
+        {
+          "text": "It includes Trio and plain asyncio in the serious portability matrix.",
+          "passed": true,
+          "evidence": "`outputs/response.md:39-42` builds `ANYIO_BACKENDS` with `('asyncio', {'use_uvloop': False})` and `'trio'`, and `outputs/response.md:61-66` labels the test as running on `trio + asyncio + uvloop when supported`."
+        },
+        {
+          "text": "It treats `asyncio+uvloop` as an additional runtime axis rather than a substitute for Trio coverage.",
+          "passed": true,
+          "evidence": "`outputs/response.md:39-47` starts with asyncio and Trio backends, then conditionally appends `('asyncio', {'use_uvloop': True})` as `id='asyncio+uvloop'`, so uvloop is added as an extra asyncio runtime axis instead of replacing Trio."
+        },
+        {
+          "text": "It explicitly states that a higher-scope async fixture needs a matching higher-scope `anyio_backend` fixture.",
+          "passed": true,
+          "evidence": "`outputs/response.md:109` says `If you insist on scope=\"module\", then anyio_backend must also be module-scoped for that module.`"
+        },
+        {
+          "text": "It explicitly mentions that AnyIO's test runner keeps async fixtures and tests in the same task, so `contextvars` can leak within that runner.",
+          "passed": false,
+          "evidence": "The response discusses leakage, but not the same-task runner detail. `outputs/response.md:86-87` says `higher-scoped async fixtures force a shared test runner; contextvars then leak across tests in that runner`, which is close but does not explicitly state that async fixtures and tests run in the same task."
+        },
+        {
+          "text": "It gates any uvloop test axis to supported CPython/POSIX runtimes instead of enabling it unconditionally on Windows or PyPy.",
+          "passed": true,
+          "evidence": "`outputs/response.md:27-36` gates uvloop behind `platform.python_implementation() == 'CPython'`, `platform.system() != 'Windows'`, and successful `import uvloop`, and `outputs/response.md:128` says `Do not hard-force uvloop on Windows or PyPy`."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 4,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.71,
+        "passed": 5,
+        "failed": 2,
+        "total": 7,
+        "time_seconds": 80.401,
+        "tokens": 2379,
+        "tool_calls": 6,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "It says `uvloop` is an asyncio event loop implementation, not a third async model.",
+          "passed": false,
+          "evidence": "The response shows asyncio-specific wiring (`asyncio.run(..., loop_factory=uvloop.new_event_loop)`, `asyncio.Runner(loop_factory=uvloop.new_event_loop)`, and `uvloop.run(...)`), but it never explicitly says that uvloop is an asyncio event loop implementation rather than a separate async model. The required framing is implied, not stated."
+        },
+        {
+          "text": "It rejects putting uvloop policy decisions into a portable library API.",
+          "passed": true,
+          "evidence": "The answer opens by saying auto-enabling uvloop inside a public async library is the wrong layer. It also says libraries should be loop-agnostic, apps choose the runner, and library code should not mutate global loop configuration."
+        },
+        {
+          "text": "It recommends app/runtime-level integration such as `uvloop.run()` or `asyncio.Runner(loop_factory=uvloop.new_event_loop)`.",
+          "passed": true,
+          "evidence": "Under `Modern wiring for an app`, the response recommends `asyncio.run(..., loop_factory=uvloop.new_event_loop)`, `asyncio.Runner(loop_factory=uvloop.new_event_loop)`, and says ``uvloop.run(...)` is also fine`."
+        },
+        {
+          "text": "It does not claim uvloop helps Trio.",
+          "passed": true,
+          "evidence": "The response never claims Trio benefits. All runtime guidance is explicitly framed around `asyncio` and `a supported asyncio app`."
+        },
+        {
+          "text": "It explicitly gates uvloop recommendations by supported CPython/POSIX runtimes rather than implying universal applicability.",
+          "passed": true,
+          "evidence": "The response states that uvloop is not a universal dependency and says its published support is CPython on POSIX or macOS, not Windows. That is explicit runtime and platform gating in the prose."
+        },
+        {
+          "text": "It explicitly says not to recommend or require uvloop on unsupported platforms such as Windows.",
+          "passed": true,
+          "evidence": "It says uvloop support is `not Windows`, and the sample code only enables uvloop when `sys.platform != \"win32\"`. That is an explicit do-not-enable-on-Windows rule."
+        },
+        {
+          "text": "It requires benchmarking or deployment justification before recommending uvloop.",
+          "passed": false,
+          "evidence": "The answer says uvloop belongs in benchmark or production deployment wiring, but it never says you should benchmark first or otherwise justify uvloop with measured deployment needs before recommending it. It still generally says apps may use uvloop for supported runtimes without that extra requirement."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 5,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 8,
+        "failed": 0,
+        "total": 8,
+        "time_seconds": 83.33,
+        "tokens": 5300,
+        "tool_calls": 3,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "It explains that `gather()` is not a lifecycle manager when sibling ownership matters.",
+          "passed": true,
+          "evidence": "PASS: `outputs/response.md:6` says `asyncio.gather()` is `weaker than it looks` and describes siblings continuing to run, then `outputs/response.md:13` recommends `TaskGroup, not loose gather()` for request-owned work."
+        },
+        {
+          "text": "It catches the missing strong reference for the detached asyncio task.",
+          "passed": true,
+          "evidence": "PASS: `outputs/response.md:3` explicitly says `asyncio.create_task()` with no stored reference is unreliable because the loop keeps only weak references, and `outputs/response.md:17` says to `keep a strong reference`."
+        },
+        {
+          "text": "It challenges the claim that the work is harmlessly detached unless ownership is explicit.",
+          "passed": true,
+          "evidence": "PASS: `outputs/response.md:1` reframes the pattern as `fire-and-hope`, and `outputs/response.md:113` says `we do not care if it completes later` does not justify closing over objects whose lifetime ends with the request."
+        },
+        {
+          "text": "It warns that eager task factory or `eager_start` changes execution semantics and is not a free performance fix for broken ownership.",
+          "passed": true,
+          "evidence": "PASS: `outputs/response.md:7` says eager execution `changes semantics`, and `outputs/response.md:109` calls it `a semantic toggle, not just a speed knob`."
+        },
+        {
+          "text": "It says detached work should receive plain data or payload snapshots rather than the `request` object, DB session, tracing span, or other request-bound resources.",
+          "passed": true,
+          "evidence": "PASS: `outputs/response.md:15-16` says to `pass only immutable data` and `create fresh resources inside that job`; the example in `outputs/response.md:28-32` uses an `AuditJob` snapshot, and `outputs/response.md:102-104` says the background job gets a snapshot instead of the live request, DB session, or span."
+        },
+        {
+          "text": "It proposes a task-group-based design or a clearly owned background worker boundary.",
+          "passed": true,
+          "evidence": "PASS: The redesign uses `asyncio.TaskGroup()` for request-owned work in `outputs/response.md:68-71` and a concrete `BackgroundSupervisor` boundary in `outputs/response.md:35-58`."
+        },
+        {
+          "text": "If it proposes an owned background boundary, it makes that boundary concrete by mentioning task references, failure observation, and an admission or shutdown policy such as reject, buffer, drain, or durable handoff.",
+          "passed": true,
+          "evidence": "PASS: `outputs/response.md:37-58` stores tasks in a set, logs failures via `_log_failure()`, and cancels/gathers outstanding tasks on shutdown. `outputs/response.md:18` and `outputs/response.md:113` also mention a durable queue/outbox when completion matters."
+        },
+        {
+          "text": "It identifies task lifetime as the primary risk.",
+          "passed": true,
+          "evidence": "PASS: `outputs/response.md:9` states `The highest-risk bug is simple: the task captures request-scoped state but is intentionally allowed to outlive the request.` That is the task-lifetime problem in direct terms."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 6,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.7777777778,
+        "passed": 7,
+        "failed": 2,
+        "total": 9,
+        "time_seconds": 40.674,
+        "tokens": 4244,
+        "tool_calls": 3,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "It says nested `asyncio.run()` under a running loop is invalid.",
+          "passed": true,
+          "evidence": "The answer rejects the current pattern as wrong in `outputs/response.md:1` and says that calling it where a loop is already running 'just fails' in `outputs/response.md:4`, which directly covers the running-loop case."
+        },
+        {
+          "text": "It distinguishes AnyIO worker threads from foreign threads.",
+          "passed": true,
+          "evidence": "The response separately covers 'AnyIO-managed threads' in `outputs/response.md:45` and 'foreign threads' in `outputs/response.md:98`, with different bridging guidance for each."
+        },
+        {
+          "text": "It introduces `BlockingPortal` or token-based access for sync-to-async bridging.",
+          "passed": true,
+          "evidence": "`outputs/response.md:24` imports `BlockingPortalProvider`, `outputs/response.md:36` stores one on the sync wrapper, and `outputs/response.md:100` also gives the token-based bridge for foreign threads."
+        },
+        {
+          "text": "It states that `from_thread.run()` / `from_thread.run_sync()` work directly only from AnyIO worker threads spawned via `to_thread.run_sync()`.",
+          "passed": false,
+          "evidence": "The answer implies this by contrasting AnyIO-managed threads with foreign threads in `outputs/response.md:45` and `outputs/response.md:98`, but it never states the important direct-usage restriction explicitly enough, and it never says they work directly only for threads spawned via `to_thread.run_sync()`."
+        },
+        {
+          "text": "It distinguishes `from_thread.run()` for async callables from `from_thread.run_sync()` for loop-thread sync callbacks such as setting an AnyIO `Event`.",
+          "passed": true,
+          "evidence": "The worker-thread examples split the two cases: `from_thread.run_sync(event.set)` for setting the `Event` in `outputs/response.md:48`, and `from_thread.run(client.fetch, key)` for calling an async function in `outputs/response.md:68`. The rule summary also separates them in `outputs/response.md:75` and `outputs/response.md:76`."
+        },
+        {
+          "text": "It mentions `current_token()` as the lighter one-off bridge for foreign threads.",
+          "passed": false,
+          "evidence": "The response says to 'pass an AnyIO token' for foreign-thread one-off callbacks in `outputs/response.md:100`, but it never names `current_token()` as the way to obtain that token."
+        },
+        {
+          "text": "It mentions `from_thread.check_cancelled()` for cooperative cancellation in long-running worker-thread code.",
+          "passed": true,
+          "evidence": "The long-running sync example calls `from_thread.check_cancelled()` in `outputs/response.md:56`, and the rule summary repeats that recommendation in `outputs/response.md:77`."
+        },
+        {
+          "text": "It does not recommend `BlockingPortal` for a one-off callback from an AnyIO worker thread when `from_thread.run()` or `from_thread.run_sync()` is enough.",
+          "passed": true,
+          "evidence": "The answer explicitly says a worker thread needing a one-off callback should use `from_thread.run()` / `from_thread.run_sync()` instead of `BlockingPortal` in `outputs/response.md:88`."
+        },
+        {
+          "text": "It does not promise that cancelling the caller will stop arbitrary worker-thread code.",
+          "passed": true,
+          "evidence": "The answer frames thread cancellation as cooperative rather than automatic: it says long-running sync work should 'cooperatively check cancellation' in `outputs/response.md:12` and uses `from_thread.check_cancelled()` in `outputs/response.md:56`, which avoids promising that arbitrary thread code will be force-stopped."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 7,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8333333333333334,
+        "passed": 5,
+        "failed": 1,
+        "total": 6,
+        "time_seconds": 84.609,
+        "tokens": 3083,
+        "tool_calls": 6,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "It states that memory object streams default to buffer size `0`, rather than assuming queue-like buffering.",
+          "passed": true,
+          "evidence": "`response.md` states: \"`create_memory_object_stream()` default buffering is `0`, not 'small queue' semantics.\""
+        },
+        {
+          "text": "It warns that using `math.inf` for an unbounded buffer is available but not recommended.",
+          "passed": true,
+          "evidence": "`response.md` states: \"Unbounded buffering (`math.inf`) is a real footgun... AnyIO explicitly documents it as not recommended.\""
+        },
+        {
+          "text": "It says AnyIO events are single-use and should not be reused like standard-library events.",
+          "passed": true,
+          "evidence": "`response.md` states: \"`Event` reuse is invalid in AnyIO terms. AnyIO events are one-shot and must be replaced.\""
+        },
+        {
+          "text": "It mentions that AnyIO's async test runner executes fixtures and tests in the same task, so `contextvars` can leak within that runner.",
+          "passed": true,
+          "evidence": "`response.md` states: \"AnyIO's pytest runner executes async fixtures and async tests in the same task... context seeded in that module fixture is not isolated per test.\""
+        },
+        {
+          "text": "It does not collapse the answer into generic semaphore/queue advice divorced from AnyIO semantics.",
+          "passed": true,
+          "evidence": "The response stays anchored in AnyIO specifics: `create_memory_object_stream()`, `math.inf`, one-shot `Event` semantics, and the AnyIO pytest runner's same-task `ContextVar` behavior. It does not drift into generic semaphore or standard queue advice."
+        },
+        {
+          "text": "It gives a concrete verification step that would exercise buffering, shutdown, or fixture leakage behavior.",
+          "passed": false,
+          "evidence": "The response gives design guidance and a \"safe shape\" checklist, but it does not provide an explicit verification step or concrete test that exercises buffering, shutdown, or fixture leakage behavior."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 8,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8333333333333334,
+        "passed": 5,
+        "failed": 1,
+        "total": 6,
+        "time_seconds": 40.209,
+        "tokens": 1888,
+        "tool_calls": 3,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "It recommends `TaskGroup.start()` instead of a guessed sleep for readiness.",
+          "passed": true,
+          "evidence": "`response.md` opens with: \"Use `TaskGroup.start()` plus `task_status.started()` right after the listener is successfully bound, not `sleep(0.1)`.\""
+        },
+        {
+          "text": "It states that the started task must call `task_status.started()`.",
+          "passed": true,
+          "evidence": "The response says the pattern uses `task_status.started()` after binding, and the example calls `task_status.started()` with the comment `# readiness signal: bind succeeded`."
+        },
+        {
+          "text": "It mentions that `TaskGroup.start()` raises `RuntimeError` if the child never signals readiness.",
+          "passed": true,
+          "evidence": "The response explicitly says: \"If the child exits without ever calling `task_status.started()`, `start()` raises: `RuntimeError(\"Child exited without calling task_status.started()\")`\"."
+        },
+        {
+          "text": "It explains that the sleep-based pattern is hiding a startup handshake bug rather than solving it.",
+          "passed": false,
+          "evidence": "The answer rejects `sleep(0.1)` as a timing hack and says it avoids \"racing the bind\", but it never clearly frames the existing code as a startup handshake bug that sleep merely hides rather than solves."
+        },
+        {
+          "text": "It explains that `start()` surfaces startup failures or bind errors immediately instead of turning them into later connection races.",
+          "passed": true,
+          "evidence": "Under \"What this buys you\", the response says: \"If bind/startup fails before readiness, `await tg.start(...)` raises that real exception\" and \"No timing hack, no CI flake from racing the bind.\""
+        },
+        {
+          "text": "It keeps the answer in AnyIO structured-concurrency terms instead of drifting into generic retry advice.",
+          "passed": true,
+          "evidence": "The response stays on AnyIO primitives and startup semantics: `create_task_group()`, `TaskGroup.start()`, `TaskStatus`, `create_tcp_listener()`, `connect_tcp()`, and `task_status.started()`. It does not suggest retries, polling, or generic backoff."
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.9861,
+        "stddev": 0.0393,
+        "min": 0.8889,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 60.0656,
+        "stddev": 16.1076,
+        "min": 40.386,
+        "max": 91.42
+      },
+      "tokens": {
+        "mean": 3930.125,
+        "stddev": 1102.8812,
+        "min": 2512,
+        "max": 5880
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.8347,
+        "stddev": 0.0818,
+        "min": 0.71,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 69.8413,
+        "stddev": 31.0185,
+        "min": 30.082,
+        "max": 123.475
+      },
+      "tokens": {
+        "mean": 3848.125,
+        "stddev": 1612.8852,
+        "min": 1888,
+        "max": 6676
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.15",
+      "time_seconds": "-9.8",
+      "tokens": "+82"
+    }
+  },
+  "notes": [
+    "Iteration 5 still has one run per eval/config pair, so the delta is directional evidence, not a stability claim.",
+    "The skill still beats baseline on 7 of 8 evals (1, 2, 3, 4, 6, 7, 8), ties only on eval 5, and never loses.",
+    "Eval 5 remains saturated even after tightening: both configurations now pass 8/8, so it is still measuring general asyncio review competence more than distinct skill value.",
+    "Eval 6 improved from the earlier broken with-skill run and now discriminates: with-skill scores 8/9 while baseline scores 7/9. The remaining with-skill miss is the exact callable split between `from_thread.run()` for async callables and `from_thread.run_sync()` for loop-thread sync callbacks.",
+    "Eval 4 remains a strong discriminator for `uvloop` framing: with-skill gets 7/7 while baseline gets 5/7 by missing the explicit 'asyncio event loop implementation' framing and the benchmark-first requirement.",
+    "Eval 3 and eval 7 still separate the skill from baseline on AnyIO-specific semantics rather than generic async talk: same-task `contextvars` leakage in the test runner and concrete verification guidance.",
+    "Time looks better with the skill in this iteration (-9.8s mean), but with a single sample per eval and wide variance, pass-rate separation is the trustworthy signal and timing is secondary.",
+    "Token cost stays nearly flat (+82 mean), so the sharper answers are not being bought with a large systematic verbosity penalty."
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "eval_id": 6,
+  "eval_name": "eval-6",
+  "prompt": "I need a synchronous wrapper around an async client for legacy code. Right now it calls `asyncio.run()` inside methods, sometimes from threads, and sometimes while an app framework already has a running loop. Show the correct AnyIO-first boundary and explain when `BlockingPortal` is the right tool.",
+  "assertions": [
+    "It says nested `asyncio.run()` under a running loop is invalid.",
+    "It distinguishes AnyIO worker threads from foreign threads.",
+    "It introduces `BlockingPortal` or token-based access for sync-to-async bridging.",
+    "It does not promise that cancelling the caller will stop arbitrary worker-thread code.",
+    "It names the references used and gives a verification step."
+  ]
+}

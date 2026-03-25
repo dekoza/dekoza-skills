@@ -1,0 +1,100 @@
+{
+  "expectations": [
+    {
+      "text": "It explains that `gather()` is not a lifecycle manager when sibling ownership matters.",
+      "passed": true,
+      "evidence": "The response says, '`asyncio.gather()` only governs the three awaited branches. The extra `create_task()` escapes that structure, so its errors, cancellation, and shutdown behavior are now somebody else's problem.'"
+    },
+    {
+      "text": "It catches the missing strong reference for the detached asyncio task.",
+      "passed": true,
+      "evidence": "It explicitly warns, 'A task created without a stored reference is explicitly unsafe in `asyncio`: the loop keeps weak references, so the task can disappear mid-execution,' and the sample keeps tasks in `background_tasks: set[asyncio.Task[None]] = set()`."
+    },
+    {
+      "text": "It challenges the claim that the work is harmlessly detached unless ownership is explicit.",
+      "passed": true,
+      "evidence": "The opening sentence rejects the premise directly: 'The “we do not care if it completes later” story is mostly fiction unless you give the task its own lifetime.'"
+    },
+    {
+      "text": "It warns that eager task factory or `eager_start` changes execution semantics and is not a free performance fix for broken ownership.",
+      "passed": true,
+      "evidence": "The response says eager execution 'is not a harmless micro-optimization. It changes semantics,' then lists execution-order changes and earlier exceptions, and later repeats, 'It is a semantic change, not just a faster scheduler path.'"
+    },
+    {
+      "text": "It says detached work should receive plain data or payload snapshots rather than the `request` object, DB session, tracing span, or other request-bound resources.",
+      "passed": true,
+      "evidence": "The safer-design bullets say 'for post-response work, pass only immutable data' and 'create fresh resources inside the background job'; the code passes `user_id`, `request_id`, and `trace_context` instead of the live request/session/span."
+    },
+    {
+      "text": "It proposes a task-group-based design or a clearly owned background worker boundary.",
+      "passed": true,
+      "evidence": "The handler example replaces request fanout with `asyncio.TaskGroup()`, and the surrounding guidance says to 'keep the request's concurrent work structured and awaited' while moving detached work to 'an app-owned registry' or a real queue."
+    },
+    {
+      "text": "If it proposes an owned background boundary, it makes that boundary concrete by mentioning task references, failure observation, and an admission or shutdown policy such as reject, buffer, drain, or durable handoff.",
+      "passed": true,
+      "evidence": "The proposed boundary is concrete: it stores strong task references in `background_tasks`, attaches `_log_task_failure`, tells the app to 'drain or cancel outstanding tasks on shutdown', and says to use 'a real job queue instead of in-process tasks' when durable handoff is required."
+    },
+    {
+      "text": "It identifies task lifetime as the primary risk.",
+      "passed": true,
+      "evidence": "It states, 'The highest-risk issue is not scheduler overhead. It is lifetime mismatch: request-bound objects are being used by work that outlives the request.'"
+    }
+  ],
+  "summary": {
+    "passed": 8,
+    "failed": 0,
+    "total": 8,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "skill": 1,
+      "webfetch": 2
+    },
+    "total_tool_calls": 3,
+    "total_steps": 3,
+    "files_created": [
+      "response.md",
+      "transcript.md",
+      "metrics.json"
+    ],
+    "errors_encountered": 0,
+    "output_chars": 5479,
+    "transcript_chars": 6383,
+    "skill_triggered": false,
+    "return_code": 0
+  },
+  "timing": {
+    "total_tokens": 48918,
+    "duration_ms": 64558,
+    "executor_duration_seconds": 64.558,
+    "grader_duration_seconds": null,
+    "total_duration_seconds": 64.558
+  },
+  "claims": [
+    {
+      "claim": "The response identifies task lifetime mismatch as the highest-risk problem in the pattern.",
+      "type": "quality",
+      "verified": true,
+      "evidence": "The response explicitly says, 'The highest-risk issue is not scheduler overhead. It is lifetime mismatch.'"
+    },
+    {
+      "claim": "The proposed safer design keeps request-time concurrency structured with `asyncio.TaskGroup` and moves detached work behind an app-owned boundary.",
+      "type": "process",
+      "verified": true,
+      "evidence": "The example uses `async with asyncio.TaskGroup() as tg:` for the request work and `spawn_background(...)` backed by a `background_tasks` registry for background ownership."
+    },
+    {
+      "claim": "The response treats eager task execution as a semantic change, not a free optimization.",
+      "type": "quality",
+      "verified": true,
+      "evidence": "It says eager execution 'is not a harmless micro-optimization. It changes semantics' and later, 'It is a semantic change, not just a faster scheduler path.'"
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  }
+}

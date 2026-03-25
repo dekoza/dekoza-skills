@@ -1,0 +1,104 @@
+{
+  "expectations": [
+    {
+      "text": "It recommends AnyIO task groups instead of raw `asyncio.create_task()` for owned child work.",
+      "passed": true,
+      "evidence": "`outputs/response.md:14` says ``asyncio.create_task(...) -> anyio.create_task_group() + tg.start_soon(...)``, which is the requested redesign for owned child work."
+    },
+    {
+      "text": "It recommends memory object streams over raw `asyncio.Queue()` for new portable designs.",
+      "passed": true,
+      "evidence": "`outputs/response.md:16` introduces `AnyIO memory object streams`, and `outputs/response.md:17` shows `anyio.create_memory_object_stream[T](max_buffer_size)`."
+    },
+    {
+      "text": "It replaces `asyncio.wait_for()` with AnyIO timeout/cancel-scope guidance rather than leaving it untouched.",
+      "passed": true,
+      "evidence": "`outputs/response.md:19` says `Replace asyncio.wait_for(...) with cancel scopes`, then `outputs/response.md:20` and `outputs/response.md:21` recommend `anyio.fail_after(...)` and `anyio.move_on_after(...)`."
+    },
+    {
+      "text": "It explicitly states that tasks spawned by native backend libraries on backends other than Trio are not subject to AnyIO's cancellation rules.",
+      "passed": false,
+      "evidence": "The response clearly says the vendor SDK is `backend-specific` and `not Trio-compatible` at `outputs/response.md:92` and `outputs/response.md:124`, but it never explicitly states the narrower claim that vendor-spawned native tasks are outside AnyIO's cancellation rules. The closest cancellation note at `outputs/response.md:76`-`outputs/response.md:77` discusses swallowed `CancelledError`, not cancellation ownership of vendor-spawned tasks."
+    },
+    {
+      "text": "It refuses to call the library fully portable while it still depends on an asyncio-native SDK that spawns its own tasks.",
+      "passed": true,
+      "evidence": "`outputs/response.md:92` says the asyncio-native SDK is `not Trio-compatible just because your outer API uses AnyIO`, and `outputs/response.md:107` warns not to claim `supports Trio` while that code path still depends on the asyncio-only SDK."
+    },
+    {
+      "text": "It requires verification on both asyncio and Trio rather than a single-backend test run.",
+      "passed": true,
+      "evidence": "`outputs/response.md:124` says to `run core tests under both asyncio and trio`, and `outputs/response.md:155` repeats that the core test suite should run under both AnyIO backends."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 1,
+    "total": 6,
+    "pass_rate": 0.8333333333333334
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "skill": 1,
+      "webfetch": 6
+    },
+    "total_tool_calls": 7,
+    "total_steps": 4,
+    "files_created": [
+      "response.md",
+      "transcript.md",
+      "metrics.json"
+    ],
+    "errors_encountered": 0,
+    "output_chars": 6676,
+    "transcript_chars": 7595,
+    "skill_triggered": false,
+    "return_code": 0
+  },
+  "timing": {
+    "executor_duration_seconds": 75.95,
+    "total_duration_seconds": 75.95,
+    "duration_ms": 75950,
+    "total_tokens": 56241
+  },
+  "claims": [
+    {
+      "claim": "The portable core should move from raw asyncio primitives to AnyIO task groups, memory object streams, and cancel scopes.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "`outputs/response.md:13`-`outputs/response.md:21` explicitly maps `create_task`, `Queue`, and `wait_for` to `create_task_group`, memory object streams, and cancel-scope-based timeouts."
+    },
+    {
+      "claim": "An asyncio-native vendor SDK that spawns its own tasks makes that feature backend-specific rather than honestly Trio-portable.",
+      "type": "quality",
+      "verified": true,
+      "evidence": "`outputs/response.md:92` says the integration is `backend-specific`, and `outputs/response.md:96`-`outputs/response.md:103` gives only asyncio-only isolation, separate-boundary, or replacement as honest options."
+    },
+    {
+      "claim": "Verification should split portable-core coverage from vendor-adapter coverage by running the core on both asyncio and Trio and the vendor adapter on asyncio only.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "`outputs/response.md:123`-`outputs/response.md:125` says to run core tests under both `asyncio` and `trio`, with vendor adapter tests under `asyncio` only."
+    },
+    {
+      "claim": "The vendor SDK is the real constraint, not the existing `create_task` / `Queue` / `wait_for` usage.",
+      "type": "quality",
+      "verified": false,
+      "evidence": "`outputs/response.md:149` asserts this judgment, but the run contains no concrete library code or experiment showing that the vendor SDK is definitively the dominant constraint relative to the current primitive usage."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "It explicitly states that tasks spawned by native backend libraries on backends other than Trio are not subject to AnyIO's cancellation rules.",
+        "reason": "This assertion is narrower than the prompt and narrower than many otherwise-correct answers. This run clearly rejects dishonest portability and isolates the asyncio-native SDK, but it fails because it does not use the exact cancellation-governance framing. If that nuance matters, make it an explicit prompt requirement or split it from the broader vendor-portability assertion."
+      }
+    ],
+    "overall": "Most assertions are discriminating. The fourth assertion is over-specific enough to reject solid answers that correctly mark the vendor SDK as backend-specific without explicitly discussing cancellation jurisdiction."
+  }
+}

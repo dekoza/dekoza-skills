@@ -1,0 +1,30 @@
+{
+  "eval_id": 4,
+  "mode": "without_skill",
+  "skill_loaded": false,
+  "repository_files_modified": false,
+  "outputs_created": [
+    "response.md",
+    "transcript.md",
+    "metrics.json"
+  ],
+  "assertions": {
+    "says_uvloop_is_asyncio_event_loop_implementation": true,
+    "rejects_library_level_uvloop_policy_decision": true,
+    "recommends_runtime_level_integration": true,
+    "does_not_claim_uvloop_helps_trio": true,
+    "gates_recommendation_by_supported_platform_runtime": true,
+    "requires_benchmark_or_deployment_justification": true
+  },
+  "references": [
+    "https://docs.python.org/3/library/asyncio-runner.html",
+    "https://docs.python.org/3/library/asyncio-policy.html",
+    "https://github.com/MagicStack/uvloop"
+  ],
+  "verification": {
+    "docs_checked": true,
+    "upstream_source_checked": true,
+    "local_execution_performed": false,
+    "reason_local_execution_skipped": "This task asked for an advisory answer, and the required claims were verified from official Python docs and uvloop upstream metadata rather than local runtime experiments."
+  }
+}

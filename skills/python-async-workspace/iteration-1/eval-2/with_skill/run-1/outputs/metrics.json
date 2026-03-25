@@ -1,0 +1,30 @@
+{
+  "eval_id": 2,
+  "skill_loaded": true,
+  "skill_name": "python-async",
+  "skill_access_mode": "manual_file_read",
+  "files_created": [
+    "response.md",
+    "transcript.md",
+    "metrics.json"
+  ],
+  "classification": "asyncio-specific",
+  "assertions": {
+    "swallowing_cancellation_is_a_bug": true,
+    "cleanup_re_raises_cancellation": true,
+    "warns_against_raw_asyncio_shield": true,
+    "suggests_bounded_cleanup_pattern": true,
+    "identifies_cancellation_semantics_as_highest_risk": true
+  },
+  "references": [
+    "skills/python-async/SKILL.md",
+    "skills/python-async/references/cancellation-timeouts.md",
+    "skills/python-async/references/structured-concurrency.md",
+    "skills/python-async/references/backend-asyncio.md"
+  ],
+  "output_notes": [
+    "Named reference files as required by the skill",
+    "Explicitly called cancellation semantics the highest-risk issue",
+    "Used bounded cleanup examples instead of recommending raw asyncio.shield()"
+  ]
+}

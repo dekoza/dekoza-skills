@@ -1,0 +1,88 @@
+{
+  "expectations": [
+    {
+      "text": "It says `uvloop` is an asyncio event loop implementation, not a third async model.",
+      "passed": false,
+      "evidence": "The response clearly treats `uvloop` as loop/runtime policy, but it never explicitly states the exact distinction `asyncio event loop implementation, not a third async model`."
+    },
+    {
+      "text": "It rejects putting uvloop policy decisions into a portable library API.",
+      "passed": true,
+      "evidence": "`outputs/response.md:1` says putting `uvloop` inside a public async library is the wrong layer, and `outputs/response.md:17`-`outputs/response.md:20` says libraries should not own loop setup or global loop side effects."
+    },
+    {
+      "text": "It recommends app/runtime-level integration such as `uvloop.run()` or `asyncio.Runner(loop_factory=uvloop.new_event_loop)`.",
+      "passed": true,
+      "evidence": "`outputs/response.md:37`-`outputs/response.md:40` shows `asyncio.run(..., loop_factory=uvloop.new_event_loop)`, `outputs/response.md:54`-`outputs/response.md:57` shows `asyncio.Runner(loop_factory=...)`, and `outputs/response.md:62`-`outputs/response.md:65` shows `uvloop.run(main())`."
+    },
+    {
+      "text": "It does not claim uvloop helps Trio.",
+      "passed": true,
+      "evidence": "The response never suggests Trio benefits from `uvloop`; every recommendation is framed as asyncio app/runtime configuration."
+    },
+    {
+      "text": "It explicitly gates uvloop recommendations by supported CPython/POSIX runtimes rather than implying universal applicability.",
+      "passed": true,
+      "evidence": "`outputs/response.md:13` calls `uvloop` a `Unix/CPython optimization`, which explicitly limits the recommendation to supported runtimes."
+    },
+    {
+      "text": "It explicitly says not to recommend or require uvloop on unsupported platforms such as Windows.",
+      "passed": true,
+      "evidence": "`outputs/response.md:5` says `uvloop` does not support Windows, and `outputs/response.md:78` says cross-platform apps with Windows developers should make it optional and fall back cleanly."
+    },
+    {
+      "text": "It requires benchmarking or deployment justification before recommending uvloop.",
+      "passed": false,
+      "evidence": "The response says apps may optionally enable `uvloop` on supported platforms, but it never requires benchmarking or deployment-specific justification before doing so."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 2,
+    "total": 7,
+    "pass_rate": 0.7142857142857143
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "skill": 1,
+      "webfetch": 6
+    },
+    "total_tool_calls": 7,
+    "total_steps": 4,
+    "files_created": [
+      "response.md",
+      "transcript.md",
+      "metrics.json"
+    ],
+    "errors_encountered": 0,
+    "output_chars": 2976,
+    "transcript_chars": 3790,
+    "skill_triggered": false,
+    "return_code": 0
+  },
+  "timing": {
+    "executor_duration_seconds": 33.826,
+    "total_duration_seconds": 33.826,
+    "duration_ms": 33826,
+    "total_tokens": 47296
+  },
+  "claims": [
+    {
+      "claim": "The response says `uvloop` belongs in application entry points, not reusable library init code.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "`outputs/response.md:9`-`outputs/response.md:13` places `uvloop` in app startup code and calls it optional app-level optimization."
+    },
+    {
+      "claim": "The response says modern asyncio apps should prefer `loop_factory=` or `uvloop.run()` over legacy global policy mutation.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "`outputs/response.md:6` calls `uvloop.install()`-style policy mutation legacy, and `outputs/response.md:22`-`outputs/response.md:68` gives `loop_factory=` and `uvloop.run()` examples."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "expectations": [
+    {
+      "text": "It says nested `asyncio.run()` under a running loop is invalid.",
+      "passed": true,
+      "evidence": "The response says '`asyncio.run()` inside wrapper methods is wrong' and that it 'explodes under a running loop.'"
+    },
+    {
+      "text": "It distinguishes AnyIO worker threads from foreign threads.",
+      "passed": true,
+      "evidence": "The response has separate sections for 'AnyIO-managed worker thread' and 'For a foreign thread'."
+    },
+    {
+      "text": "It introduces `BlockingPortal` or token-based access for sync-to-async bridging.",
+      "passed": true,
+      "evidence": "It recommends 'a token for one-off calls, or a portal for repeated calls' and later shows a `BlockingPortal`-based wrapper."
+    },
+    {
+      "text": "It states that `from_thread.run()` / `from_thread.run_sync()` work directly only from AnyIO worker threads spawned via `to_thread.run_sync()`.",
+      "passed": true,
+      "evidence": "The response says `anyio.to_thread.run_sync()` creates an AnyIO-managed worker thread, then says inside that worker thread `from_thread.run()` and `from_thread.run_sync()` are the correct tools; for foreign threads it says those helpers are not enough."
+    },
+    {
+      "text": "It distinguishes `from_thread.run()` for async callables from `from_thread.run_sync()` for loop-thread sync callbacks such as setting an AnyIO `Event`.",
+      "passed": true,
+      "evidence": "It says '`from_thread.run()` calls async callables back on the loop' while '`from_thread.run_sync()` is for loop-thread sync callbacks like `event.set`.'"
+    },
+    {
+      "text": "It mentions `current_token()` as the lighter one-off bridge for foreign threads.",
+      "passed": true,
+      "evidence": "The foreign-thread example imports `current_token`, captures `token = current_token()`, and passes it to `from_thread.run_sync(event.set, token=token)`."
+    },
+    {
+      "text": "It mentions `from_thread.check_cancelled()` for cooperative cancellation in long-running worker-thread code.",
+      "passed": true,
+      "evidence": "The long-running sync job example polls `from_thread.check_cancelled()` and the text says prompt stop requires cooperative polling with it."
+    },
+    {
+      "text": "It does not recommend `BlockingPortal` for a one-off callback from an AnyIO worker thread when `from_thread.run()` or `from_thread.run_sync()` is enough.",
+      "passed": true,
+      "evidence": "It says 'Do not use it for a trivial worker-thread callback that only needs `event.set`; `from_thread.run_sync(event.set)` is the correct tool there.'"
+    },
+    {
+      "text": "It does not promise that cancelling the caller will stop arbitrary worker-thread code.",
+      "passed": true,
+      "evidence": "The response says 'Python cannot kill a worker thread' and explains that `abandon_on_cancel=True` only stops waiting for the result, not the thread itself."
+    }
+  ],
+  "summary": {
+    "passed": 9,
+    "failed": 0,
+    "total": 9,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "skill": 1,
+      "read": 3,
+      "bash": 1
+    },
+    "total_tool_calls": 5,
+    "total_steps": 4,
+    "errors_encountered": 0,
+    "output_chars": 4492,
+    "transcript_chars": 5433
+  },
+  "timing": {
+    "executor_duration_seconds": 62.344,
+    "grader_duration_seconds": 0.0,
+    "total_duration_seconds": 62.344
+  },
+  "claims": [
+    {
+      "claim": "The response says `BlockingPortal` is for repeated or lifecycle-owning sync access to async code, not trivial one-off callbacks.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "It says the portal is right for 'many repeated sync calls', async lifecycle wrapping, and long-lived foreign-thread access, then rejects it for a trivial `event.set` callback."
+    },
+    {
+      "claim": "The executor attempted a local runtime check and could not complete it because `anyio` was unavailable.",
+      "type": "process",
+      "verified": true,
+      "evidence": "The transcript includes a `bash` tool call, and the response says 'I could not do a local runtime smoke test because `anyio` is not installed in this environment.'"
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  }
+}

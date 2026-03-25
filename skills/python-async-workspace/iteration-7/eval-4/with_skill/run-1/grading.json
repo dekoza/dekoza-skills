@@ -1,0 +1,70 @@
+{
+  "expectations": [
+    {
+      "text": "It says `uvloop` is an asyncio event loop implementation, not a third async model.",
+      "passed": true,
+      "evidence": "Line 3: 'uvloop is an asyncio event loop implementation, not a general async upgrade.'"
+    },
+    {
+      "text": "It rejects putting uvloop policy decisions into a portable library API.",
+      "passed": true,
+      "evidence": "Line 1: 'Enabling uvloop inside a public async library is the wrong layer.' Line 5: 'libraries provide correct async code; applications choose the runner.'"
+    },
+    {
+      "text": "It recommends app/runtime-level integration such as `uvloop.run()` or `asyncio.Runner(loop_factory=uvloop.new_event_loop)`.",
+      "passed": true,
+      "evidence": "Lines 23: 'uvloop.run(main())' and line 36: 'asyncio.Runner(loop_factory=uvloop.new_event_loop) as runner'"
+    },
+    {
+      "text": "It does not claim uvloop helps Trio.",
+      "passed": true,
+      "evidence": "Response consistently frames uvloop as asyncio-only. No claims about Trio benefits."
+    },
+    {
+      "text": "It explicitly gates uvloop recommendations by supported CPython/POSIX runtimes rather than implying universal applicability.",
+      "passed": true,
+      "evidence": "Line 4: 'Windows is not a supported uvloop target' and line 59: 'gate by supported platform/runtime'"
+    },
+    {
+      "text": "It explicitly says not to recommend or require uvloop on unsupported platforms such as Windows.",
+      "passed": true,
+      "evidence": "Line 4: 'Windows is not a supported uvloop target, and uvloop support can lag specific CPython releases.'"
+    },
+    {
+      "text": "It requires benchmarking or deployment justification before recommending uvloop.",
+      "passed": true,
+      "evidence": "Line 58: 'benchmark before claiming a win'"
+    }
+  ],
+  "summary": {
+    "passed": 7,
+    "failed": 0,
+    "total": 7,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "skill": 2,
+      "read": 3
+    },
+    "total_tool_calls": 5,
+    "total_steps": 3,
+    "errors_encountered": 0,
+    "output_chars": 2106,
+    "transcript_chars": 2843,
+    "skill_triggered": true,
+    "return_code": 0
+  },
+  "timing": {
+    "executor_duration_seconds": 0.0,
+    "total_duration_seconds": 27.798,
+    "duration_ms": 27798,
+    "total_tokens": 71328
+  },
+  "claims": [],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "expectations": [
+    {
+      "text": "It says swallowing cancellation is a bug, not a style choice.",
+      "passed": true,
+      "evidence": "`outputs/response.md:3` says catching `CancelledError` and continuing the loop is `wrong`, and says `swallowing it makes the task refuse to die` rather than treating it as a stylistic preference."
+    },
+    {
+      "text": "It explains that cleanup should re-raise cancellation after running.",
+      "passed": true,
+      "evidence": "`outputs/response.md:26` says to `prefer bounded best-effort cleanup and then propagate cancellation`, and `outputs/response.md:49-51` shows `except asyncio.CancelledError: ... raise` after cleanup-related shielding."
+    },
+    {
+      "text": "It warns against using raw `asyncio.shield()` as the default fix.",
+      "passed": true,
+      "evidence": "`outputs/response.md:4` says `asyncio.shield()` does not make the caller uncancelled and can leave `a half-detached cleanup task still running during shutdown`, which is a direct warning against treating raw shielding as the default solution."
+    },
+    {
+      "text": "It suggests bounded cleanup such as `move_on_after(..., shield=True)` or an equivalent backend-specific bounded pattern.",
+      "passed": true,
+      "evidence": "`outputs/response.md:35-36` uses `asyncio.timeout(5)` around `resource.aclose()`, and `outputs/response.md:47-48` uses `asyncio.timeout(5)` around a shielded close task. That is an equivalent bounded asyncio-specific pattern."
+    },
+    {
+      "text": "It states that intentionally suppressing asyncio cancellation requires `uncancel()` to clear the task's cancellation state.",
+      "passed": true,
+      "evidence": "`outputs/response.md:5` says `you must also clear that state with Task.uncancel()`, and `outputs/response.md:63` shows `task.uncancel()` in the asyncio-only suppression example."
+    },
+    {
+      "text": "It identifies cancellation semantics as the highest-risk issue.",
+      "passed": false,
+      "evidence": "The response is centered on cancellation problems, but it never explicitly says cancellation semantics are the highest-risk issue or otherwise clearly ranks them above the other shutdown concerns. The evidence shows focus, not an explicit priority claim."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 1,
+    "total": 6,
+    "pass_rate": 0.83
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "webfetch": 2
+    },
+    "total_tool_calls": 2,
+    "total_steps": 2,
+    "files_created": [
+      "response.md",
+      "transcript.md",
+      "metrics.json"
+    ],
+    "errors_encountered": 0,
+    "output_chars": 2818,
+    "transcript_chars": 3530,
+    "skill_triggered": false,
+    "return_code": 0
+  },
+  "timing": {
+    "total_tokens": 35344,
+    "duration_ms": 30082,
+    "executor_duration_seconds": 30.082,
+    "total_duration_seconds": 30.082
+  },
+  "claims": [
+    {
+      "claim": "The python-async skill did not trigger during this run.",
+      "type": "process",
+      "verified": true,
+      "evidence": "`outputs/transcript.md:22` says `python-async skill triggered: False`, and `outputs/metrics.json:15` says `\"skill_triggered\": false`."
+    },
+    {
+      "claim": "The executor used webfetch twice.",
+      "type": "process",
+      "verified": true,
+      "evidence": "`outputs/transcript.md:15-16` lists two `Tool use: webfetch` events, and `outputs/metrics.json:2-4` records `\"webfetch\": 2`."
+    },
+    {
+      "claim": "Intentional asyncio-only cancellation suppression requires clearing cancellation state with `uncancel()`.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "This claim is present in the output itself and is concretely expressed in the recommended code: `outputs/response.md:5` says `you must also clear that state with Task.uncancel()`, and `outputs/response.md:63` applies `task.uncancel()`."
+    },
+    {
+      "claim": "The response identifies cancellation semantics as the highest-risk issue.",
+      "type": "quality",
+      "verified": false,
+      "evidence": "The response discusses cancellation throughout, but there is no explicit ranking statement such as `this is the highest-risk problem`; the claim is not supported strongly enough by the text."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "It identifies cancellation semantics as the highest-risk issue.",
+        "reason": "This is subjective and hard to verify from the available artifacts. A response can clearly focus on cancellation bugs without ever making an explicit priority claim, which creates avoidable grading ambiguity."
+      },
+      {
+        "reason": "No assertion checks the important detail that `asyncio.shield()` does not clear cancellation of the outer task and can leave half-detached cleanup running. That is a concrete failure mode the response covered, and it is more discriminating than a generic anti-shield assertion."
+      }
+    ],
+    "overall": "The eval is mostly solid, but one assertion is overly subjective and it misses a sharper check around outer-task cancellation state when `asyncio.shield()` is used."
+  }
+}

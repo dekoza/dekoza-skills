@@ -1,0 +1,85 @@
+{
+  "expectations": [
+    {
+      "text": "It explains that `gather()` is not a lifecycle manager and that sibling awaitables may keep running after one branch fails.",
+      "passed": true,
+      "evidence": "Line 6: 'gather() is also the weaker primitive here: if one child raises, gather() propagates that exception but does not cancel the other children; TaskGroup does.'"
+    },
+    {
+      "text": "It catches the missing strong reference for the detached asyncio task.",
+      "passed": true,
+      "evidence": "Line 5: 'A task created with asyncio.create_task() must have a stored reference; the Python docs explicitly warn the event loop keeps only weak references, so an unreferenced task can disappear mid-execution.'"
+    },
+    {
+      "text": "It challenges the claim that the work is harmlessly detached unless ownership is explicit.",
+      "passed": true,
+      "evidence": "Lines 8-13: detailed lifecycle bugs including request lifetime violation, closed sessions, ended spans, cancelled context. Line 22: 'The real bug is not scheduler overhead. It is letting post-response work depend on request-scoped objects. That is a lifetime violation.'"
+    },
+    {
+      "text": "It warns that eager task factory or `eager_start` changes execution semantics and is not a free performance fix for broken ownership.",
+      "passed": true,
+      "evidence": "Line 16: 'eager_start / eager task factory is a semantic change, not a free optimization.' Lines 17-19 detail how it changes execution timing."
+    },
+    {
+      "text": "It says detached work should receive plain data or payload snapshots rather than the `request` object, DB session, tracing span, or other request-bound resources.",
+      "passed": true,
+      "evidence": "Lines 121: 'Post-response work gets only immutable data, not live request/session/span objects.' PostResponseJob dataclass at lines 31-36 contains only IDs and trace info. Lines 138: 'Do not capture request, request DB sessions, or live spans in detached tasks.'"
+    },
+    {
+      "text": "It proposes a task-group-based design or a clearly owned background worker boundary.",
+      "passed": true,
+      "evidence": "Lines 91: 'async with asyncio.TaskGroup() as tg:' for request fanout. BackgroundDispatcher class at lines 37-88 provides an owned background worker boundary."
+    },
+    {
+      "text": "If it proposes an owned background boundary, it makes failure observation explicit instead of leaving background errors orphaned.",
+      "passed": true,
+      "evidence": "Worker at lines 72-78 catches exceptions in try/finally. Shutdown at lines 59-70 uses gather with return_exceptions=True and cancels workers explicitly."
+    },
+    {
+      "text": "If it proposes an in-process post-response boundary, it makes admission, backpressure, or shutdown behavior explicit rather than calling it 'app-owned' in the abstract.",
+      "passed": true,
+      "evidence": "Lines 125-135: explicit policy choices (best effort, must happen before success, important but can finish shortly after, must survive crash/deploy). Bounded queue with maxsize, explicit submit_nowait with QueueFull handling, shutdown with drain_timeout."
+    },
+    {
+      "text": "It says durable handoff such as an outbox or job queue is the correct mechanism when completion must survive shutdown or crash.",
+      "passed": true,
+      "evidence": "Line 129: 'must survive crash/deploy: durable handoff to a broker/job system before returning success.' Line 133: 'If losing the work is not acceptable, in-process create_task() is the wrong tool; hand it off durably.'"
+    },
+    {
+      "text": "It identifies task lifetime as the primary risk.",
+      "passed": true,
+      "evidence": "Line 22: 'The real bug is not scheduler overhead. It is letting post-response work depend on request-scoped objects. That is a lifetime violation.' Labeled as 'Highest-Risk Issue'."
+    }
+  ],
+  "summary": {
+    "passed": 10,
+    "failed": 0,
+    "total": 10,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "skill": 1,
+      "webfetch": 2
+    },
+    "total_tool_calls": 3,
+    "total_steps": 3,
+    "errors_encountered": 0,
+    "output_chars": 6975,
+    "transcript_chars": 8076,
+    "skill_triggered": false,
+    "return_code": 0
+  },
+  "timing": {
+    "executor_duration_seconds": 0.0,
+    "total_duration_seconds": 58.964,
+    "duration_ms": 58964,
+    "total_tokens": 88962
+  },
+  "claims": [],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "eval_id": 3,
+  "mode": "without_skill",
+  "skill_loaded": false,
+  "repository_files_modified": false,
+  "outputs_created": [
+    "response.md",
+    "transcript.md",
+    "metrics.json"
+  ],
+  "assertions": {
+    "mentions_anyio_pytest_asyncio_auto_conflict": true,
+    "provides_concrete_anyio_backend_fixture": true,
+    "includes_trio_and_plain_asyncio": true,
+    "treats_asyncio_uvloop_as_additional_axis": true,
+    "names_references_and_verification_strategy": true
+  },
+  "references": [
+    "https://anyio.readthedocs.io/en/stable/testing.html",
+    "https://pytest-asyncio.readthedocs.io/en/stable/concepts.html"
+  ],
+  "verification": {
+    "docs_checked": true,
+    "local_execution_performed": false,
+    "reason_local_execution_skipped": "Repository pyproject.toml does not declare AnyIO or pytest-asyncio, so local runtime verification here would be ungrounded."
+  }
+}

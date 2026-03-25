@@ -1,0 +1,113 @@
+{
+  "expectations": [
+    {
+      "text": "It explains that `gather()` is not a lifecycle manager when sibling ownership matters.",
+      "passed": true,
+      "evidence": "`outputs/response.md:9` says: \"`asyncio.gather()` is not a lifecycle manager. It is only an aggregate await.\" The same paragraph ties this to sibling lifetime coupling."
+    },
+    {
+      "text": "It catches the missing strong reference for the detached asyncio task.",
+      "passed": true,
+      "evidence": "`outputs/response.md:10` says a bare `asyncio.create_task()` with no stored reference is worse because the event loop keeps only weak references, so the detached task can be garbage-collected before it finishes."
+    },
+    {
+      "text": "It challenges the claim that the work is harmlessly detached unless ownership is explicit.",
+      "passed": true,
+      "evidence": "`outputs/response.md:7` says \"That pattern is not harmless fire-and-forget. It is broken ownership.\" `outputs/response.md:11` adds that returning before completion is a design claim requiring explicit ownership."
+    },
+    {
+      "text": "It proposes a task-group-based design or a clearly owned background worker boundary.",
+      "passed": true,
+      "evidence": "`outputs/response.md:34-50` shows an `asyncio.TaskGroup()` redesign for request-scoped work, and `outputs/response.md:53-96` shows an explicit `AuditDispatcher` worker boundary for detached work."
+    },
+    {
+      "text": "It identifies task lifetime as the primary risk.",
+      "passed": true,
+      "evidence": "`outputs/response.md:5` states \"The primary risk is task lifetime.\" `outputs/response.md:112` repeats that the highest-risk footgun is the orphaned `create_task()`."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "eval_id": 5,
+    "eval_name": "eval-5",
+    "skill_requested": "python-async",
+    "skill_source_path": "/home/minder/projekty/oh-my-slop/skills/python-async/SKILL.md",
+    "skill_tool_loaded": false,
+    "answer_mode": "asyncio-specific",
+    "references_used": [
+      "references/decision-matrix.md",
+      "references/structured-concurrency.md",
+      "references/cancellation-timeouts.md",
+      "references/backend-asyncio.md",
+      "references/code-review-checklist.md"
+    ],
+    "output_files": [
+      "response.md",
+      "transcript.md",
+      "metrics.json"
+    ],
+    "assertion_results": {
+      "explains_gather_is_not_lifecycle_manager": true,
+      "catches_missing_strong_reference_for_detached_task": true,
+      "challenges_harmless_detached_work_claim": true,
+      "proposes_task_group_or_owned_background_boundary": true,
+      "identifies_task_lifetime_as_primary_risk": true
+    },
+    "notes": [
+      "The response treats the problem as asyncio-specific because the prompt is about asyncio APIs.",
+      "The safer design shows both request-scoped TaskGroup ownership and an application-owned background worker boundary.",
+      "The built-in skill loader could not load the repo-local skill, so repository skill files were read directly."
+    ],
+    "output_chars": 6825,
+    "transcript_chars": 1083
+  },
+  "timing": {
+    "task_id": "ses_2daebbda5ffeYueKhWXM2aVp3D",
+    "note": "duration_ms and total_tokens were not provided by the task tool result, so those values could not be captured."
+  },
+  "claims": [
+    {
+      "claim": "The answer mode is `asyncio-specific`.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "`outputs/response.md:1` says `Answer mode: `asyncio-specific`` and `outputs/metrics.json:7` records `\"answer_mode\": \"asyncio-specific\"`."
+    },
+    {
+      "claim": "The run read five repository reference documents before writing the output.",
+      "type": "process",
+      "verified": true,
+      "evidence": "`outputs/transcript.md:5-9` lists five reference files read: decision matrix, structured concurrency, cancellation/timeouts, backend asyncio, and code review checklist."
+    },
+    {
+      "claim": "The safer design includes both request-scoped structured concurrency and an application-owned detached-work boundary.",
+      "type": "quality",
+      "verified": true,
+      "evidence": "`outputs/response.md:40-50` uses `asyncio.TaskGroup()` for owned child work, while `outputs/response.md:60-96` moves detached work into `AuditDispatcher` with explicit startup, queueing, and shutdown."
+    },
+    {
+      "claim": "The built-in skill loader did not load the repo-local skill, so the run read the repository skill files directly.",
+      "type": "process",
+      "verified": true,
+      "evidence": "`outputs/transcript.md:4` says the repo-local skill was read directly because it is not a registered built-in skill, and `outputs/metrics.json:30` repeats that the built-in skill loader could not load it."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "It proposes a task-group-based design or a clearly owned background worker boundary.",
+        "reason": "This can pass with a shallow mention of `TaskGroup` or a queue. A stronger assertion would require explicit ownership details such as shutdown handling, strong task retention, or error-reporting boundaries so the eval rejects cosmetic redesigns."
+      }
+    ],
+    "overall": "The current assertions cover the core review points well, but they do not strongly discriminate between a concrete owned-background design and a superficial name-drop."
+  }
+}

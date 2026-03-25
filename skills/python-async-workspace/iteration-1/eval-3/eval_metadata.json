@@ -1,0 +1,12 @@
+{
+  "eval_id": 3,
+  "eval_name": "eval-3",
+  "prompt": "Our tests use AnyIO and `pytest-asyncio`, and CI got flaky right after someone set both plugins to auto mode. We also want to run the important tests on Trio, plain asyncio, and asyncio+uvloop. Show the right pytest setup and tell me what not to do.",
+  "assertions": [
+    "It explicitly mentions the AnyIO vs `pytest-asyncio` auto-mode conflict.",
+    "It provides a concrete `anyio_backend` fixture or equivalent configuration.",
+    "It includes Trio and plain asyncio in the serious portability matrix.",
+    "It treats `asyncio+uvloop` as an additional runtime axis rather than a substitute for Trio coverage.",
+    "It names the references used and states the verification strategy."
+  ]
+}

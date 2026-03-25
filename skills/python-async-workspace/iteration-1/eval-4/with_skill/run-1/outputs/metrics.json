@@ -1,0 +1,37 @@
+{
+  "eval_id": 4,
+  "eval_name": "eval-4",
+  "skill_requested": "python-async",
+  "skill_source_path": "/home/minder/projekty/oh-my-slop/skills/python-async/SKILL.md",
+  "skill_tool_loaded": false,
+  "skill_access_mode": "manual_file_read",
+  "answer_mode": "asyncio-runtime-specific",
+  "references_used": [
+    "references/backend-uvloop.md",
+    "references/decision-matrix.md"
+  ],
+  "external_verification": [
+    "https://docs.python.org/3/library/asyncio-runner.html",
+    "https://github.com/MagicStack/uvloop",
+    "https://pypi.org/project/uvloop/",
+    "https://anyio.readthedocs.io/en/stable/basics.html"
+  ],
+  "output_files": [
+    "response.md",
+    "transcript.md",
+    "metrics.json"
+  ],
+  "assertion_results": {
+    "says_uvloop_is_asyncio_implementation_not_third_model": true,
+    "rejects_library_level_uvloop_policy": true,
+    "recommends_app_runtime_integration_with_uvloop_run_or_runner": true,
+    "does_not_claim_uvloop_helps_trio": true,
+    "gates_recommendation_by_supported_platform_runtime": true,
+    "requires_benchmark_or_deployment_justification": true
+  },
+  "notes": [
+    "The response keeps uvloop out of the public library boundary and places it at app bootstrap/runtime configuration.",
+    "The response names `uvloop.run()` as the preferred entry point and `asyncio.Runner(loop_factory=uvloop.new_event_loop)` as the explicit-control pattern.",
+    "The response explicitly gates uvloop guidance to supported CPython/POSIX targets and calls out Windows as unsupported by current uvloop metadata."
+  ]
+}

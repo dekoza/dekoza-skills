@@ -1,0 +1,92 @@
+{
+  "expectations": [
+    {
+      "text": "It says swallowing cancellation is a bug, not a style choice.",
+      "passed": true,
+      "evidence": "The response says the worker that catches `CancelledError` and keeps looping is 'wrong' and later makes it explicit: '`except asyncio.CancelledError: ... continue` is a shutdown bug.'"
+    },
+    {
+      "text": "It explains that cleanup should re-raise cancellation after running.",
+      "passed": true,
+      "evidence": "The safer-pattern bullets say 'Re-raise cancellation after cleanup,' and both code examples end cancellation handling with `finally: raise`."
+    },
+    {
+      "text": "It warns against using raw `asyncio.shield()` as the default fix.",
+      "passed": true,
+      "evidence": "The response states: 'The `asyncio.shield()` cleanup is also wrong as a default pattern,' and explains that it can leave close work running in the background without a time bound."
+    },
+    {
+      "text": "It suggests bounded cleanup such as `move_on_after(..., shield=True)` or an equivalent backend-specific bounded pattern.",
+      "passed": true,
+      "evidence": "It proposes an asyncio-specific bounded pattern: create a close task, then `async with asyncio.timeout(seconds): await asyncio.shield(close_task)`, and cancel the close task if the timeout expires."
+    },
+    {
+      "text": "It states that intentionally suppressing asyncio cancellation requires `uncancel()` to clear the task's cancellation state.",
+      "passed": true,
+      "evidence": "The response says that if you suppress `CancelledError` and continue, 'you must also clear the task's cancellation state with `uncancel()`,' and the example calls `task.uncancel()` with the note 'clears poisoned state'."
+    },
+    {
+      "text": "It identifies cancellation semantics as the highest-risk issue.",
+      "passed": true,
+      "evidence": "The answer has a dedicated 'Highest-risk footgun' section focused entirely on cancellation misuse: swallowed `CancelledError` and unbounded `asyncio.shield()`."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "skill": 1,
+      "read": 2
+    },
+    "total_tool_calls": 3,
+    "total_steps": 3,
+    "errors_encountered": 0,
+    "output_chars": 3913,
+    "transcript_chars": 4671,
+    "files_created": [
+      "response.md",
+      "transcript.md",
+      "metrics.json"
+    ],
+    "skill_triggered": true,
+    "return_code": 0
+  },
+  "timing": {
+    "executor_duration_seconds": 46.981,
+    "total_duration_seconds": 46.981,
+    "total_tokens": 26253
+  },
+  "claims": [
+    {
+      "claim": "The answer is explicitly asyncio-specific rather than pretending to be backend-portable advice.",
+      "type": "quality",
+      "verified": true,
+      "evidence": "The very first line says: 'This is `asyncio-specific`.'"
+    },
+    {
+      "claim": "The response provides a bounded cleanup pattern instead of recommending unbounded shielding.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "The example `close_with_budget()` wraps shielded cleanup in `asyncio.timeout(seconds)` and cancels the close task on timeout."
+    },
+    {
+      "claim": "The python-async skill was triggered for this run.",
+      "type": "process",
+      "verified": true,
+      "evidence": "The transcript's Skill Trigger Check says 'python-async skill triggered: True,' and the event summary lists `skill:python-async`."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "No suggestions, evals look solid for this run. The assertions check the main shutdown-cancellation failure modes and the asyncio-only `uncancel()` edge case."
+  }
+}

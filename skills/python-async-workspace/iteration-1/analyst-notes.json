@@ -1,0 +1,10 @@
+[
+  "All 31 recorded expectations pass in both `with_skill` and `without_skill` configurations, so the benchmark contains no discriminating assertion that demonstrates incremental skill value.",
+  "Every eval is a 100%/100% tie (`eval_id` 1-6 for both configurations), which means the aggregate `pass_rate` delta of `+0.00` is not hiding a mixed story; there is simply no eval where the skill changes the scored outcome.",
+  "Several expectations test answer format or generic async best-practice framing (for example labeling the answer mode, naming references, stating a verification step, or repeating widely known guidance about cancellation/task groups), and the baseline satisfies all of them too; these assertions validate competent answering more than skill-specific lift.",
+  "The benchmark metadata says `runs_per_configuration: 3`, but the data only includes `run_number: 1` for each eval/configuration pair. That eliminates any real flakiness analysis and makes the reported stddevs a cross-eval mixture, not repeat-run variance.",
+  "Aggregate pass rates hide that the benchmark is saturated: every scored task is already solved without the skill, so this run does not show where the skill helps, hurts, or meaningfully changes behavior under harder async edge cases.",
+  "Resource metrics are also weak evidence here: `time_seconds` is `0.0` for every run, and token capture is inconsistent enough to include literal `0` values on `with_skill` eval 4 and `without_skill` eval 5, so the `+703` token delta is not a reliable efficiency signal.",
+  "The only recorded errors/notes are harness or setup artifacts rather than task-quality differences: `with_skill` eval 1 logs an initial missing directory read, and `with_skill` evals 3-4 note that the repo-local skill could not be loaded through `functions.skill` and had to be read manually.",
+  "Because the scored outcomes are identical while the `with_skill` path sometimes incurs extra overhead or workaround behavior, this benchmark currently supports at most 'no measurable value shown' rather than evidence that the skill improves async answers."
+]

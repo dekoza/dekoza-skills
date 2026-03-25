@@ -1,0 +1,27 @@
+{
+  "eval_id": 6,
+  "mode": "without_skill",
+  "skill_loaded": false,
+  "repository_files_modified": false,
+  "outputs_created": [
+    "response.md",
+    "transcript.md",
+    "metrics.json"
+  ],
+  "assertions": {
+    "says_nested_asyncio_run_invalid_under_running_loop": true,
+    "distinguishes_anyio_worker_threads_from_foreign_threads": true,
+    "introduces_blocking_portal_or_token_based_access": true,
+    "does_not_promise_caller_cancellation_stops_worker_thread": true,
+    "names_references_and_verification_step": true
+  },
+  "references": [
+    "https://docs.python.org/3/library/asyncio-runner.html#running-an-asyncio-program",
+    "https://anyio.readthedocs.io/en/stable/threads.html"
+  ],
+  "verification": {
+    "docs_checked": true,
+    "local_execution_performed": false,
+    "reason_local_execution_skipped": "Repository pyproject.toml does not declare AnyIO, so local runtime verification here would be ungrounded."
+  }
+}

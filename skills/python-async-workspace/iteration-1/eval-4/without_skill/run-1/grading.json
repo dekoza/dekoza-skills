@@ -1,0 +1,111 @@
+{
+  "expectations": [
+    {
+      "text": "It says `uvloop` is an asyncio event loop implementation, not a third async model.",
+      "passed": true,
+      "evidence": "`outputs/response.md` says: \"`uvloop` is an `asyncio` event loop implementation. It is not a third async model\"."
+    },
+    {
+      "text": "It rejects putting uvloop policy decisions into a portable library API.",
+      "passed": true,
+      "evidence": "`outputs/response.md` opens with \"Do not enable `uvloop` automatically inside a public async library\" and later says \"A library should not silently choose the process event loop for its users.\""
+    },
+    {
+      "text": "It recommends app/runtime-level integration such as `uvloop.run()` or `asyncio.Runner(loop_factory=uvloop.new_event_loop)`.",
+      "passed": true,
+      "evidence": "`outputs/response.md` says uvloop belongs \"In the application/runtime entrypoint\" and provides both `uvloop.run(main())` and `asyncio.Runner(loop_factory=uvloop.new_event_loop)` examples."
+    },
+    {
+      "text": "It does not claim uvloop helps Trio.",
+      "passed": true,
+      "evidence": "`outputs/response.md` states \"It does nothing for Trio\" and later \"Trio application: `uvloop` is irrelevant.\""
+    },
+    {
+      "text": "It explicitly gates uvloop recommendations by supported platform/runtime rather than implying universal applicability.",
+      "passed": true,
+      "evidence": "`outputs/response.md` says uvloop should be used \"for supported platforms, typically Linux or macOS\" and \"Cross-platform product with Windows support: gate `uvloop` by platform/runtime support\"."
+    },
+    {
+      "text": "It requires benchmarking or deployment justification before recommending uvloop.",
+      "passed": true,
+      "evidence": "`outputs/response.md` says \"Performance claims without measurement are hand-waving\" and recommends uvloop only when there is \"benchmark or deployment evidence\" and \"after benchmarking your real production workload\"."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "eval_id": 4,
+    "mode": "without_skill",
+    "skill_loaded": false,
+    "repository_files_modified": false,
+    "outputs_created": [
+      "response.md",
+      "transcript.md",
+      "metrics.json"
+    ],
+    "assertions": {
+      "says_uvloop_is_asyncio_event_loop_implementation": true,
+      "rejects_library_level_uvloop_policy_decision": true,
+      "recommends_runtime_level_integration": true,
+      "does_not_claim_uvloop_helps_trio": true,
+      "gates_recommendation_by_supported_platform_runtime": true,
+      "requires_benchmark_or_deployment_justification": true
+    },
+    "references": [
+      "https://docs.python.org/3/library/asyncio-runner.html",
+      "https://docs.python.org/3/library/asyncio-policy.html",
+      "https://github.com/MagicStack/uvloop"
+    ],
+    "verification": {
+      "docs_checked": true,
+      "upstream_source_checked": true,
+      "local_execution_performed": false,
+      "reason_local_execution_skipped": "This task asked for an advisory answer, and the required claims were verified from official Python docs and uvloop upstream metadata rather than local runtime experiments."
+    },
+    "output_chars": 4855,
+    "transcript_chars": 1300
+  },
+  "timing": {
+    "task_id": "ses_2daebbdaaffeDBWbsX8OuY6VIB",
+    "note": "duration_ms and total_tokens were not provided by the task tool result, so those values could not be captured."
+  },
+  "claims": [
+    {
+      "claim": "The answer treats `uvloop` as an asyncio-specific event loop implementation rather than a separate async model.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "`outputs/response.md` explicitly says \"`uvloop` is an `asyncio` event loop implementation. It is not a third async model\"."
+    },
+    {
+      "claim": "The recommended integration path is modern runner-based startup wiring instead of deprecated policy-based installation.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "`outputs/response.md` recommends `uvloop.run()` and `asyncio.Runner(loop_factory=uvloop.new_event_loop)`, and `outputs/transcript.md` says Python docs deprecate policy-based loop configuration and recommend runner/loop_factory wiring."
+    },
+    {
+      "claim": "The response is grounded in official Python docs and uvloop upstream material.",
+      "type": "process",
+      "verified": true,
+      "evidence": "`outputs/transcript.md` says official asyncio docs and uvloop upstream materials were fetched and checked, and `outputs/response.md` lists those sources explicitly."
+    },
+    {
+      "claim": "uvloop explicitly rejects Windows in its setup guard.",
+      "type": "factual",
+      "verified": false,
+      "evidence": "`outputs/transcript.md` claims this was confirmed from upstream metadata, but the actual setup guard or packaging file is not included in the run outputs, so this specific sub-claim is not independently verifiable from the available artifacts."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "No suggestions, evals look solid. The assertions check the core portability, runtime-scoping, and modern integration points rather than superficial formatting."
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "expectations": [
+    {
+      "text": "It says nested `asyncio.run()` under a running loop is invalid.",
+      "passed": true,
+      "evidence": "Line 1: 'asyncio.run() inside wrapper methods is the wrong design. It only works when that method happens to be the top-level entry point for a fresh thread with no running loop. In your cases it is actively broken: it explodes in a framework loop thread'"
+    },
+    {
+      "text": "It distinguishes AnyIO worker threads from foreign threads.",
+      "passed": true,
+      "evidence": "Lines 32-34: worker thread function labeled 'Called from an AnyIO worker thread created by to_thread.run_sync()'. Lines 43-44: foreign thread function labeled 'Called from a plain threading.Thread, not an AnyIO worker thread'."
+    },
+    {
+      "text": "It introduces `BlockingPortal` or token-based access for sync-to-async bridging.",
+      "passed": true,
+      "evidence": "Line 7: 'from anyio.from_thread import BlockingPortal'. SyncClient pattern uses portal.call(). Line 72: 'token=current_token()' for foreign threads. Lines 87-94: when BlockingPortal is the right tool."
+    },
+    {
+      "text": "It states that `from_thread.run()` / `from_thread.run_sync()` work directly only from AnyIO worker threads spawned via `to_thread.run_sync()`.",
+      "passed": true,
+      "evidence": "Lines 106-107: '3. AnyIO worker thread calling back into loop once -> from_thread.run / run_sync' vs '4. Foreign thread calling back once -> current_token() + from_thread.run / run_sync' - foreign threads need the token parameter."
+    },
+    {
+      "text": "It distinguishes `from_thread.run()` for async callables from `from_thread.run_sync()` for loop-thread sync callbacks such as setting an AnyIO `Event`.",
+      "passed": true,
+      "evidence": "Line 34: 'run_sync(event.set)' for sync callback (event.set). Line 71: 'from_thread.run(...) / from_thread.run_sync(...)' listed separately. Lines 77-79: worker-thread callback setting Event uses run_sync, not run."
+    },
+    {
+      "text": "It mentions `current_token()` as the lighter one-off bridge for foreign threads.",
+      "passed": true,
+      "evidence": "Line 72: 'token=current_token()' and line 99: 'A foreign thread only needs an occasional one-off callback; a loop token is simpler'. Line 107: 'Foreign thread calling back once -> current_token() + from_thread.run / run_sync'"
+    },
+    {
+      "text": "It mentions `from_thread.check_cancelled()` for cooperative cancellation in long-running worker-thread code.",
+      "passed": true,
+      "evidence": "Lines 38-39: 'def long_running_sync() -> None: while True: check_cancelled()  # cooperatively stop when the host task is cancelled' and line 84: 'call from_thread.check_cancelled() inside its loop'"
+    },
+    {
+      "text": "It does not recommend `BlockingPortal` for a one-off callback from an AnyIO worker thread when `from_thread.run()` or `from_thread.run_sync()` is enough.",
+      "passed": true,
+      "evidence": "Lines 96-100: 'When it is not the right tool: One worker-thread callback just needs event.set() / A foreign thread only needs an occasional one-off callback; a loop token is simpler'"
+    },
+    {
+      "text": "It does not promise that cancelling the caller will stop arbitrary worker-thread code.",
+      "passed": true,
+      "evidence": "Line 85: 'do not rely on abandon_on_cancel=True for this; that abandons the thread instead of stopping it cleanly'"
+    }
+  ],
+  "summary": {
+    "passed": 9,
+    "failed": 0,
+    "total": 9,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "skill": 1,
+      "webfetch": 2
+    },
+    "total_tool_calls": 3,
+    "total_steps": 3,
+    "errors_encountered": 0,
+    "output_chars": 4265,
+    "transcript_chars": 5157,
+    "skill_triggered": false,
+    "return_code": 0
+  },
+  "timing": {
+    "executor_duration_seconds": 0.0,
+    "total_duration_seconds": 77.154,
+    "duration_ms": 77154,
+    "total_tokens": 84883
+  },
+  "claims": [],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  }
+}

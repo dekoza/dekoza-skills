@@ -1,0 +1,94 @@
+{
+  "expectations": [
+    {
+      "text": "It explains that `gather()` is not a lifecycle manager when sibling ownership matters.",
+      "passed": true,
+      "evidence": "The response says '`asyncio.gather()` is not a lifecycle boundary' and explains siblings can keep running while the handler unwinds."
+    },
+    {
+      "text": "It catches the missing strong reference for the detached asyncio task.",
+      "passed": true,
+      "evidence": "It says '`asyncio` keeps only weak references to tasks, so a truly fire-and-forget task can be garbage-collected before completion.'"
+    },
+    {
+      "text": "It challenges the claim that the work is harmlessly detached unless ownership is explicit.",
+      "passed": true,
+      "evidence": "The response says '\"We do not care if it completes later\" is usually false' and lists cases where you absolutely do care."
+    },
+    {
+      "text": "It warns that eager task factory or `eager_start` changes execution semantics and is not a free performance fix for broken ownership.",
+      "passed": true,
+      "evidence": "It says '`eager_start` / eager task factories change semantics' and 'is not a free speedup' because ordering, error timing, and context assumptions change."
+    },
+    {
+      "text": "It says detached work should receive plain data or payload snapshots rather than the `request` object, DB session, tracing span, or other request-bound resources.",
+      "passed": true,
+      "evidence": "The response says 'hand off plain data to an app-owned worker boundary' and that the background boundary should take 'a data snapshot, not live request objects.'"
+    },
+    {
+      "text": "It proposes a task-group-based design or a clearly owned background worker boundary.",
+      "passed": true,
+      "evidence": "It explicitly splits the design into 'Request-bound concurrent work: use `TaskGroup`' and 'Post-response work: hand off plain data to an app-owned worker boundary.'"
+    },
+    {
+      "text": "If it proposes an owned background boundary, it makes that boundary concrete by mentioning task references, failure observation, and an admission or shutdown policy such as reject, buffer, drain, or durable handoff.",
+      "passed": false,
+      "evidence": "The response makes the boundary concrete with a queue, failure reporting, draining/cancellation, and a durable outbox option, but it never explicitly calls out task references as part of the boundary contract."
+    },
+    {
+      "text": "It identifies task lifetime as the primary risk.",
+      "passed": true,
+      "evidence": "The response says the 'highest-risk lie' is believing background work that outlives the request can safely keep request-owned resources, which is an explicit lifetime mismatch."
+    }
+  ],
+  "summary": {
+    "passed": 7,
+    "failed": 1,
+    "total": 8,
+    "pass_rate": 0.875
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "skill": 2,
+      "read": 3
+    },
+    "total_tool_calls": 5,
+    "total_steps": 3,
+    "errors_encountered": 0,
+    "output_chars": 5938,
+    "transcript_chars": 6877
+  },
+  "timing": {
+    "executor_duration_seconds": 44.093,
+    "grader_duration_seconds": 0.0,
+    "total_duration_seconds": 44.093
+  },
+  "claims": [
+    {
+      "claim": "The response says untracked fire-and-forget asyncio tasks can be garbage-collected before completion.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "It states that asyncio keeps only weak references to tasks."
+    },
+    {
+      "claim": "The safer design is to keep request-bound work in a task group and hand post-response work to an app-owned worker boundary.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "The numbered design split says exactly that."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "If it proposes an owned background boundary, it makes that boundary concrete by mentioning task references, failure observation, and an admission or shutdown policy such as reject, buffer, drain, or durable handoff.",
+        "reason": "This assertion bundles several distinct requirements into one pass/fail gate. Splitting task references, failure observation, and admission/shutdown policy into separate checks would make failures more discriminating and easier to interpret."
+      }
+    ],
+    "overall": "Assertion 7 is overly compound; a strong answer can miss one sub-point and lose the whole check."
+  }
+}

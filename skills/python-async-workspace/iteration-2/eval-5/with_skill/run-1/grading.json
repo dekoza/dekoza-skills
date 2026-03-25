@@ -1,0 +1,94 @@
+{
+  "expectations": [
+    {
+      "text": "It explains that `gather()` is not a lifecycle manager when sibling ownership matters.",
+      "passed": true,
+      "evidence": "The response states: '`asyncio.gather()` is only a result aggregator. It is not a lifecycle boundary.' It also contrasts that with request-coupled work that should use `TaskGroup` and be awaited."
+    },
+    {
+      "text": "It catches the missing strong reference for the detached asyncio task.",
+      "passed": true,
+      "evidence": "The response explicitly says: '`asyncio` only keeps weak references to tasks. If you do not keep a strong reference, the task can disappear before finishing.'"
+    },
+    {
+      "text": "It challenges the claim that the work is harmlessly detached unless ownership is explicit.",
+      "passed": true,
+      "evidence": "It rejects the premise directly: '`We do not care if it completes later` is usually code for `we have not assigned ownership`.' It later adds: 'do not spawn it ad hoc from the handler; make it best-effort and explicitly supervised.'"
+    },
+    {
+      "text": "It proposes a task-group-based design or a clearly owned background worker boundary.",
+      "passed": true,
+      "evidence": "The response proposes both: 'Request-coupled concurrent work: use `TaskGroup` and await it' and 'Work allowed to outlive the request: hand it to an app-owned background worker or external queue.' It includes concrete `asyncio.TaskGroup` and `BackgroundDispatcher` examples."
+    },
+    {
+      "text": "If it proposes an owned background boundary, it makes that boundary concrete by mentioning task references, failure observation, or draining on shutdown.",
+      "passed": true,
+      "evidence": "The dispatcher example stores `self.worker_task`, logs failures in `_worker()`, and defines shutdown handling in `stop()`. The explanation also says: 'The worker task has a strong reference', 'You can define shutdown behavior: drain, stop, or reject new jobs', and 'Failures are observed and logged in one place.'"
+    },
+    {
+      "text": "It identifies task lifetime as the primary risk.",
+      "passed": true,
+      "evidence": "The response centers the risk on lifecycle failure: 'The highest-risk bug is not `it might finish later.` It is `it might finish half-way, or never, and nobody will know.`'"
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "skill": 2,
+      "read": 3
+    },
+    "total_tool_calls": 5,
+    "total_steps": 3,
+    "errors_encountered": 0,
+    "output_chars": 4765,
+    "transcript_chars": 5505,
+    "files_created": [
+      "response.md",
+      "transcript.md",
+      "metrics.json"
+    ],
+    "skill_triggered": true,
+    "return_code": 0
+  },
+  "timing": {
+    "executor_duration_seconds": 58.564,
+    "total_duration_seconds": 58.564,
+    "total_tokens": 29856
+  },
+  "claims": [
+    {
+      "claim": "The python-async skill triggered for this run.",
+      "type": "process",
+      "verified": true,
+      "evidence": "The transcript says 'python-async skill triggered: True' and `metrics.json` also records `skill_triggered: true`."
+    },
+    {
+      "claim": "The proposed background design keeps a strong reference to the worker task.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "In the response code, `start()` assigns `self.worker_task = asyncio.create_task(self._worker())`, so the dispatcher owns a strong reference."
+    },
+    {
+      "claim": "The proposed background design observes worker failures in one place.",
+      "type": "quality",
+      "verified": true,
+      "evidence": "The `_worker()` method catches `Exception` and calls `logger.exception('Background job failed', extra={'job': job})`, which makes failures observable instead of leaving them unowned."
+    },
+    {
+      "claim": "`asyncio` only keeps weak references to tasks.",
+      "type": "factual",
+      "verified": false,
+      "evidence": "The response makes this claim, but the run artifacts do not include external documentation or another source that verifies it. It is therefore not verifiable from the available evidence here."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "expectations": [
+    {
+      "text": "It explains that `gather()` is not a lifecycle manager when sibling ownership matters.",
+      "passed": true,
+      "evidence": "The response says that `asyncio.gather()` gives concurrency rather than ownership and later narrows its use to cases where aggregate results are acceptable despite weaker failure semantics. That directly treats `gather()` as the wrong primitive for sibling lifecycle ownership."
+    },
+    {
+      "text": "It catches the missing strong reference for the detached asyncio task.",
+      "passed": true,
+      "evidence": "It explicitly warns that a bare `create_task()` with no stored reference is unsafe and cites the Python docs point that the loop keeps only weak references, so the task can disappear mid-execution."
+    },
+    {
+      "text": "It challenges the claim that the work is harmlessly detached unless ownership is explicit.",
+      "passed": true,
+      "evidence": "The opening frames the pattern as fire-and-hope rather than harmless detachment, and says returning before completion while closing over request-scoped objects creates use-after-lifetime bugs and undefined shutdown behavior."
+    },
+    {
+      "text": "It warns that eager task factory or `eager_start` changes execution semantics and is not a free performance fix for broken ownership.",
+      "passed": true,
+      "evidence": "It states that `eager_start` or the eager task factory is a semantic change, not a free optimization, and explains that it may run immediately during `create_task(...)`, changing ordering, error timing, lock contention, and tracing behavior."
+    },
+    {
+      "text": "It says detached work should receive plain data or payload snapshots rather than the `request` object, DB session, tracing span, or other request-bound resources.",
+      "passed": true,
+      "evidence": "The redesign says true post-response work should hand off plain data to an app-owned background worker and later emphasizes that the request handler passes a data snapshot rather than live request objects, while the worker owns its own DB session and span."
+    },
+    {
+      "text": "It proposes a task-group-based design or a clearly owned background worker boundary.",
+      "passed": true,
+      "evidence": "It provides both: a request-scoped `asyncio.TaskGroup` example and a separate `AuditDispatcher` queue plus supervised worker for post-response work."
+    },
+    {
+      "text": "If it proposes an owned background boundary, it makes that boundary concrete by mentioning task references, failure observation, and an admission or shutdown policy such as reject, buffer, drain, or durable handoff.",
+      "passed": true,
+      "evidence": "The `AuditDispatcher` stores `self._worker_task`, reports exceptions via `report_background_failure(job)`, uses a bounded queue (`maxsize=1000`) for admission and backpressure, and calls for explicit shutdown behavior with tests proving the worker drains, rejects, or drops according to policy. It also mentions a durable queue or outbox handoff when reliability matters."
+    },
+    {
+      "text": "It identifies task lifetime as the primary risk.",
+      "passed": true,
+      "evidence": "It explicitly says the highest-risk issue is detached work using request-owned resources after the request lifetime ends."
+    }
+  ],
+  "summary": {
+    "passed": 8,
+    "failed": 0,
+    "total": 8,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "skill": 2,
+      "read": 2,
+      "webfetch": 1
+    },
+    "total_tool_calls": 5,
+    "total_steps": 3,
+    "files_created": [
+      "response.md",
+      "transcript.md",
+      "metrics.json"
+    ],
+    "errors_encountered": 0,
+    "output_chars": 5880,
+    "transcript_chars": 6823,
+    "skill_triggered": true,
+    "return_code": 0
+  },
+  "timing": {
+    "executor_duration_seconds": 60.694,
+    "total_duration_seconds": 60.694,
+    "duration_ms": 60694,
+    "total_tokens": 40263
+  },
+  "claims": [
+    {
+      "claim": "`asyncio.create_task()` requires keeping a strong reference to avoid tasks disappearing mid-execution.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "The response states this explicitly, and Python's `asyncio.create_task()` docs warn: \"Save a reference ... The event loop only keeps weak references to tasks.\""
+    },
+    {
+      "claim": "`asyncio.gather()` gives concurrency but weaker sibling-failure safety than `TaskGroup`.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "The response says \"`asyncio.gather()` gives concurrency, not ownership,\" and Python's docs say other awaitables in `gather()` \"won't be cancelled\" when one raises, while `TaskGroup` provides stronger safety guarantees."
+    },
+    {
+      "claim": "Eager task execution changes semantics rather than acting as a free optimization.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "The response warns it is a semantic change, and Python's eager task factory docs say immediate execution \"is a semantic change\" that can alter task execution order."
+    },
+    {
+      "claim": "A safer detached-work design hands off plain data to an app-owned worker that creates its own request-independent resources.",
+      "type": "quality",
+      "verified": true,
+      "evidence": "The proposed `AuditDispatcher` receives an `AuditJob` data snapshot with `user_id` and `trace_id`, then creates its own session and tracing span inside the background worker instead of reusing request-bound objects."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  }
+}

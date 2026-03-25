@@ -1,0 +1,13 @@
+{
+  "eval_id": 7,
+  "eval_name": "eval-7",
+  "prompt": "I have an AnyIO pipeline that uses `create_memory_object_stream()`, an `Event`, and a module-scoped async fixture that seeds context variables for tests. Review the design for real async footguns: default buffering, unbounded queues, event reuse, and fixture/task context leakage. I do not want generic concurrency advice.",
+  "assertions": [
+    "It states that memory object streams default to buffer size `0`, rather than assuming queue-like buffering.",
+    "It warns that using `math.inf` for an unbounded buffer is available but not recommended.",
+    "It says AnyIO events are single-use and should not be reused like standard-library events.",
+    "It mentions that AnyIO's async test runner executes fixtures and tests in the same task, so `contextvars` can leak within that runner.",
+    "It does not collapse the answer into generic semaphore/queue advice divorced from AnyIO semantics.",
+    "It gives a concrete verification step that would exercise buffering, shutdown, or fixture leakage behavior."
+  ]
+}

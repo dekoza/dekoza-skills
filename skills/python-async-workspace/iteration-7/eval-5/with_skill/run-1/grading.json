@@ -1,0 +1,85 @@
+{
+  "expectations": [
+    {
+      "text": "It explains that `gather()` is not a lifecycle manager and that sibling awaitables may keep running after one branch fails.",
+      "passed": true,
+      "evidence": "Line 3: 'asyncio.gather() is fine for \"run 3 things and collect results\", but it is not a lifecycle boundary; if one child raises, the others are not automatically cancelled the way a TaskGroup gives you.'"
+    },
+    {
+      "text": "It catches the missing strong reference for the detached asyncio task.",
+      "passed": true,
+      "evidence": "Line 4: 'Bare asyncio.create_task() with no stored reference is a footgun; asyncio only keeps weak references to tasks, so the task can be lost before completion.'"
+    },
+    {
+      "text": "It challenges the claim that the work is harmlessly detached unless ownership is explicit.",
+      "passed": true,
+      "evidence": "Line 5: '\"We do not care if it completes later\" is sloppy framing. You must care about ownership, shutdown, overload, and failure visibility even if the HTTP caller does not wait for the result.'"
+    },
+    {
+      "text": "It warns that eager task factory or `eager_start` changes execution semantics and is not a free performance fix for broken ownership.",
+      "passed": true,
+      "evidence": "Line 7: 'Enabling eager task factory / eager_start here is not a free speedup. It changes execution timing and ordering. That can surface hidden reentrancy and lifetime bugs sooner, not fix them.' Lines 164-169 elaborate further."
+    },
+    {
+      "text": "It says detached work should receive plain data or payload snapshots rather than the `request` object, DB session, tracing span, or other request-bound resources.",
+      "passed": true,
+      "evidence": "Lines 30-41: 'The detached unit of work should contain only serializable, durable inputs like: IDs, timestamps, correlation / trace IDs... It should not contain: request, ORM / DB session objects, open sockets / file handles, live tracing span objects'"
+    },
+    {
+      "text": "It proposes a task-group-based design or a clearly owned background worker boundary.",
+      "passed": true,
+      "evidence": "Lines 23-25: 'Use asyncio.TaskGroup for the three child calls' and lines 27-28: 'Hand off a plain data snapshot to an app-owned background boundary: bounded queue, worker pool, or durable outbox.' Full BackgroundDispatcher implementation at lines 69-120."
+    },
+    {
+      "text": "If it proposes an owned background boundary, it makes failure observation explicit instead of leaving background errors orphaned.",
+      "passed": true,
+      "evidence": "Lines 105-114: worker catches Exception and has comment 'report to logs / metrics / error tracking'. Line 15: 'Invisible failure: if the detached task errors after the response, the user already got 200 OK; unless you explicitly report it, the failure vanishes into logs or worse.'"
+    },
+    {
+      "text": "If it proposes an in-process post-response boundary, it makes admission, backpressure, or shutdown behavior explicit rather than calling it 'app-owned' in the abstract.",
+      "passed": true,
+      "evidence": "Lines 44-54: explicit policy choices listed (Buffer and drain, Reject when full, Drop when full, Durable handoff). BackgroundDispatcher shows bounded queue (maxsize=1000), explicit submit with QueueFull handling, and shutdown with drain_timeout."
+    },
+    {
+      "text": "It says durable handoff such as an outbox or job queue is the correct mechanism when completion must survive shutdown or crash.",
+      "passed": true,
+      "evidence": "Line 49: 'Durable handoff: if the work must survive process crash or deploy, put it in a broker / DB outbox and let a separate worker own it.' Line 53: 'If losing the work is not acceptable -> durable handoff.'"
+    },
+    {
+      "text": "It identifies task lifetime as the primary risk.",
+      "passed": true,
+      "evidence": "Line 185: 'The highest-risk issue is the detached task capturing request-scoped objects. That is not \"background processing\"; it is use-after-lifetime with good marketing.'"
+    }
+  ],
+  "summary": {
+    "passed": 10,
+    "failed": 0,
+    "total": 10,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "skill": 2,
+      "read": 5
+    },
+    "total_tool_calls": 7,
+    "total_steps": 3,
+    "errors_encountered": 0,
+    "output_chars": 8424,
+    "transcript_chars": 9594,
+    "skill_triggered": true,
+    "return_code": 0
+  },
+  "timing": {
+    "executor_duration_seconds": 0.0,
+    "total_duration_seconds": 55.299,
+    "duration_ms": 55299,
+    "total_tokens": 75315
+  },
+  "claims": [],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  }
+}

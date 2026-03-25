@@ -1,0 +1,115 @@
+{
+  "expectations": [
+    {
+      "text": "It says swallowing cancellation is a bug, not a style choice.",
+      "passed": true,
+      "evidence": "Passed: `response.md:7` says `That is not defensive code. It is a shutdown bug.` after describing code that catches `CancelledError` and keeps looping. The transcript also records `swallowing cancellation is a bug` in `outputs/transcript.md:10-15`."
+    },
+    {
+      "text": "It explains that cleanup should re-raise cancellation after running.",
+      "passed": true,
+      "evidence": "Passed: `response.md:9` states `catch cancellation only to do minimal cleanup, then re-raise it`, and the safer worker example does `await cleanup_on_cancel()` followed by `raise` in `response.md:39-42`."
+    },
+    {
+      "text": "It warns against using raw `asyncio.shield()` as the default fix.",
+      "passed": true,
+      "evidence": "Passed: `response.md:45` says `The `asyncio.shield()` cleanup is also a footgun`, and `response.md:45-46` adds `Using raw `asyncio.shield()` as the default fix is the wrong pattern.`"
+    },
+    {
+      "text": "It suggests bounded cleanup such as `move_on_after(..., shield=True)` or an equivalent backend-specific bounded pattern.",
+      "passed": true,
+      "evidence": "Passed: the AnyIO example uses `with anyio.move_on_after(5, shield=True)` in `response.md:59-64`. The plain asyncio example also gives an equivalent bounded pattern with `await asyncio.wait_for(asyncio.shield(close_task), timeout=5)` and timeout handling in `response.md:80-87`."
+    },
+    {
+      "text": "It identifies cancellation semantics as the highest-risk issue.",
+      "passed": true,
+      "evidence": "Passed: `response.md:5` explicitly says `The highest-risk issue is broken cancellation semantics.` The transcript repeats that point in `outputs/transcript.md:15-16`."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "eval_id": 2,
+    "skill_loaded": true,
+    "skill_name": "python-async",
+    "skill_access_mode": "manual_file_read",
+    "files_created": [
+      "response.md",
+      "transcript.md",
+      "metrics.json"
+    ],
+    "classification": "asyncio-specific",
+    "assertions": {
+      "swallowing_cancellation_is_a_bug": true,
+      "cleanup_re_raises_cancellation": true,
+      "warns_against_raw_asyncio_shield": true,
+      "suggests_bounded_cleanup_pattern": true,
+      "identifies_cancellation_semantics_as_highest_risk": true
+    },
+    "references": [
+      "skills/python-async/SKILL.md",
+      "skills/python-async/references/cancellation-timeouts.md",
+      "skills/python-async/references/structured-concurrency.md",
+      "skills/python-async/references/backend-asyncio.md"
+    ],
+    "output_notes": [
+      "Named reference files as required by the skill",
+      "Explicitly called cancellation semantics the highest-risk issue",
+      "Used bounded cleanup examples instead of recommending raw asyncio.shield()"
+    ],
+    "output_chars": 4262,
+    "transcript_chars": 1155
+  },
+  "timing": {
+    "task_id": "ses_2daefa075ffe7lMeN5P7C6CByD",
+    "duration_ms": null,
+    "total_tokens": null,
+    "executor_duration_seconds": null,
+    "note": "duration_ms and total_tokens were not provided by the task tool result, so those values could not be captured."
+  },
+  "claims": [
+    {
+      "claim": "The answer is classified as `asyncio-specific`.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Verified in `response.md:1`, which says `This is `asyncio-specific`.`"
+    },
+    {
+      "claim": "Swallowing `CancelledError` is a shutdown bug.",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Supported by `response.md:7-9` and by the loaded references: `skills/python-async/references/cancellation-timeouts.md:41-47` says cancellation should be caught only for cleanup and re-raised, and `skills/python-async/references/backend-asyncio.md:55-60` warns swallowing `CancelledError` breaks structured-concurrency helpers."
+    },
+    {
+      "claim": "Cleanup should run and then re-raise cancellation.",
+      "type": "process",
+      "verified": true,
+      "evidence": "Verified in `response.md:39-42`, where the worker logs cancellation, awaits cleanup, and then `raise`s. This matches `skills/python-async/references/cancellation-timeouts.md:41-45`."
+    },
+    {
+      "claim": "Raw `asyncio.shield()` is not the default fix for shutdown cleanup.",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Verified in `response.md:45-47`. The cited references back it up: `skills/python-async/references/cancellation-timeouts.md:49-55` says to shield only bounded finalization and not recommend raw `asyncio.shield()` for new portable code, while `skills/python-async/references/backend-asyncio.md:64-68` treats shielding as a sharp tool, not a default."
+    },
+    {
+      "claim": "The response provides bounded cleanup patterns for both AnyIO and plain asyncio.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Verified in `response.md:49-64` for the AnyIO `move_on_after(..., shield=True)` example and in `response.md:67-88` for the plain asyncio `wait_for(..., timeout=5)` example."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "No suggestions, evals look solid. The assertions are discriminating and the available outputs are sufficient to verify them."
+  }
+}
