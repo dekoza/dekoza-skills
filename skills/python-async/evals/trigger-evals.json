@@ -1,0 +1,66 @@
+[
+  {
+    "query": "I maintain a Python library that currently uses `asyncio.create_task()` and `asyncio.Queue()`. I want it to run on both asyncio and Trio with AnyIO without lying about portability. Show the redesign direction and the traps.",
+    "should_trigger": true
+  },
+  {
+    "query": "Why does my async service hang on shutdown after catching `CancelledError` and continuing? I also wrapped cleanup in `asyncio.shield()` because I did not want cancellation to interrupt it.",
+    "should_trigger": true
+  },
+  {
+    "query": "Our tests use AnyIO and `pytest-asyncio`, and CI got flaky after someone put both plugins into auto mode. I also want a backend matrix for Trio, asyncio, and asyncio+uvloop.",
+    "should_trigger": true
+  },
+  {
+    "query": "Should I enable uvloop in a public async library, or is that only an app/runtime decision? We also have Windows developers, so I need the real answer, not benchmarks cosplay.",
+    "should_trigger": true
+  },
+  {
+    "query": "Review this async pattern: request handler calls `asyncio.gather()`, spawns a detached `create_task()` with no stored reference, and returns early because we supposedly do not care if that work survives.",
+    "should_trigger": true
+  },
+  {
+    "query": "I need a sync wrapper around an async client for legacy code. Right now methods call `asyncio.run()` from worker threads and sometimes while a framework loop is already running. Is `BlockingPortal` the right boundary?",
+    "should_trigger": true
+  },
+  {
+    "query": "This Trio worker loop seems to starve the rest of the app. Can you review it for missing checkpoints, cancellation mistakes, and wrong clock assumptions?",
+    "should_trigger": true
+  },
+  {
+    "query": "I have an AnyIO service using memory object streams and capacity limiters. I want a hard-nosed review of backpressure, shutdown, and thread-boundary mistakes.",
+    "should_trigger": true
+  },
+  {
+    "query": "My FastAPI app has a dependency problem around lifespan, background tasks, and WebSocket shutdown. I need framework-specific FastAPI guidance, not generic AnyIO advice.",
+    "should_trigger": false
+  },
+  {
+    "query": "Can you help me tune Celery worker prefetch, retries, and broker settings? We use async code elsewhere, but this issue is about task-queue operations.",
+    "should_trigger": false
+  },
+  {
+    "query": "I need help debugging gevent monkey patching and greenlet context issues in a legacy service. asyncio and Trio are not in the stack.",
+    "should_trigger": false
+  },
+  {
+    "query": "Show me how to use Django async views with HTMX partials and Tabler components for a search page. The async part matters, but the real work is Django plus frontend behavior.",
+    "should_trigger": false
+  },
+  {
+    "query": "I need low-level details on selector internals, epoll vs kqueue behavior, and how CPython event loop callbacks are scheduled under the hood.",
+    "should_trigger": false
+  },
+  {
+    "query": "We need kernel and TCP tuning for a high-load Linux box. Someone mentioned uvloop, but the real issue is socket backlog, sysctl values, and NIC offload settings.",
+    "should_trigger": false
+  },
+  {
+    "query": "I am on aiohttp only. Please explain the right Gunicorn worker, app startup hooks, and deployment config. Do not generalize this into AnyIO portability advice.",
+    "should_trigger": false
+  },
+  {
+    "query": "Can you help me compare Pydantic, msgspec, and attrs for a framework-agnostic serialization layer? Async came up in the meeting, but the decision is really about data modeling.",
+    "should_trigger": false
+  }
+]
