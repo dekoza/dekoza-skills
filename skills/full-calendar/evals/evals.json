@@ -1,0 +1,49 @@
+{
+  "skill_name": "full-calendar",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Add a FullCalendar monthly view to my Django project. Events should be loaded from /api/events/ as JSON. I need Polish locale.",
+      "expected_output": "CDN script tag setup with FullCalendar and locale set to 'pl', Calendar constructor with dayGridMonth view and events JSON feed URL.",
+      "expectations": [
+        "Uses FullCalendar v6 CDN bundle (not npm/yarn install)",
+        "Sets initialView to dayGridMonth",
+        "Sets locale to 'pl' for Polish",
+        "Uses JSON feed from /api/events/ (events property set to URL string or object with url)",
+        "Calls calendar.render() after construction",
+        "Includes firstDay: 1 (Monday start, standard for Polish locale)",
+        "Uses htmx.ajax() as the bridge pattern (not hx-* attributes on calendar elements) if HTMX integration is shown",
+        "Does not require separate interaction plugin import for basic calendar display"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I have a FullCalendar on my page and I want clicking on an event to open an HTMX modal with event details fetched from the server.",
+      "expected_output": "eventClick callback using htmx.ajax() to fetch a server-rendered partial into a modal container.",
+      "expectations": [
+        "Uses eventClick callback (not dateClick or select)",
+        "Calls info.jsEvent.preventDefault() in eventClick to prevent default URL navigation",
+        "Uses htmx.ajax() to fetch event details from the server",
+        "Targets a modal container element for the HTMX swap",
+        "Does NOT mention interaction plugin as a requirement for eventClick",
+        "Shows the modal only after HTMX content is loaded (not before, to avoid empty flash)",
+        "Uses TemplateResponse or server-rendered partial (not JsonResponse) for the modal content"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I need drag-and-drop on my calendar so users can reschedule events. When they drop, it should PATCH the backend API and revert if the request fails.",
+      "expected_output": "editable: true, eventDrop callback with fetch PATCH and info.revert() on failure.",
+      "expectations": [
+        "Sets editable: true on the calendar",
+        "Implements eventDrop callback",
+        "Also implements eventResize callback (drag changes position, resize changes duration)",
+        "Uses fetch() with method PATCH (not HTMX - drag-drop persistence is a JSON API call)",
+        "Calls info.revert() in the catch/error handler to undo the visual change on failure",
+        "Sends start and end in the PATCH payload",
+        "Includes CSRF token in the PATCH request (X-CSRFToken header)",
+        "Checks response.ok or response status before considering success"
+      ]
+    }
+  ]
+}
