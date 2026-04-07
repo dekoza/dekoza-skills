@@ -1,42 +1,65 @@
 # Django-Allauth Provider Index
 
-Use this file to route provider questions across the full documented provider catalog without pretending every provider needs a full standalone manual.
+Use this file to route provider questions across the documented provider catalog by protocol family. This is a routing aid, not a place to invent undocumented provider behavior.
 
-## How To Use This File
+## Shared Callback Pattern
 
-1. Identify the provider family: OAuth 2.0, OAuth 1.0a, OpenID Connect, SAML, OpenID, or a custom protocol.
-2. Use this file to confirm whether the provider is documented by allauth.
-3. Route major or failure-prone providers to `references/providers-major.md`.
+- Standard provider callback URLs follow `/accounts/<provider>/login/callback/`.
+- The provider docs explicitly use examples such as `/accounts/twitter/login/callback/` and `/accounts/soundcloud/login/callback/`.
+- If login breaks after redirect, verify callback host, `SITE_ID`, and `SocialApp` site assignment before assuming a provider-specific bug.
 
-## Provider Families To Index
+## Provider Families
 
-- OpenID Connect family and related enterprise providers
+### OAuth 2.0
+
+- The largest family in the catalog.
+- Includes mainstream providers such as Google, Apple, GitHub, Microsoft, and many others.
+- Also includes enterprise-ish entries such as Auth0, Keycloak, Okta, NetIQ/Microfocus AccessManager, Authelia, Amazon Cognito, NextCloud, and Mailcow.
+- Route Google, Apple, GitHub, Microsoft, OpenID Connect, and SAML to `references/providers-major.md` because they have higher-cost boundary mistakes.
+
+### OAuth 1.0a
+
+- The catalog includes OAuth 1.0a providers such as Discogs and X/Twitter (OAuth 1).
+- Do not reuse OAuth 2.0 assumptions for callback flow or token handling.
+
+### OpenID Connect
+
+- allauth has a dedicated OpenID Connect provider that can host multiple subproviders.
+- Enterprise setups that are effectively OIDC, such as Auth0, Keycloak, Okta, or NetIQ, should still be answered with provider-specific or OIDC-aware guidance, not generic OAuth advice.
+
+### SAML
+
+- SAML is its own provider family with organization-scoped endpoints and metadata handling.
+- Route SAML questions to `references/providers-major.md` when ACS, metadata, entity ID, attribute mapping, or HTTPS/reverse-proxy concerns are involved.
+
+### OpenID
+
+- Legacy OpenID remains in the catalog as a separate documented provider.
+- Do not mix it with OpenID Connect.
+
+## Real Catalog Anchors
+
+- Google
+- Apple
+- GitHub
+- Microsoft
+- Auth0
+- Keycloak
+- Okta
+- NetIQ/Microfocus AccessManager
+- OpenID Connect
+- OpenID
 - SAML
-- Mainstream OAuth providers such as Google, Apple, GitHub, Microsoft
-- The rest of the documented provider catalog grouped by protocol family
 
-## Rules
+## Routing Rules
 
-- Do not invent provider-specific callback, scope, or claim behavior.
-- When a provider is not deeply covered here, say that only the documented allauth surface is safe to assume.
-- Use `providers-major.md` when the task is about Google, Apple, GitHub, Microsoft, OpenID Connect, SAML, or an enterprise OIDC setup.
-
-## Routing By Family
-
-- OpenID Connect: use this file for catalog-level routing, then move to `references/providers-major.md` for OpenID Connect, enterprise OIDC, Auth0-class, or Keycloak-class setups.
-- SAML: use `references/providers-major.md` when the question is about assertion consumer URLs, entity IDs, tenant-specific metadata, or multi-site deployment boundaries.
-- Mainstream OAuth providers: use `references/providers-major.md` for Google, Apple, GitHub, and Microsoft because callback alignment, verified-email assumptions, and provider-console configuration mistakes are common.
-- Other OAuth 2.0 and OAuth 1.0a providers: stay grounded in the documented allauth provider surface and `SocialApp` or settings configuration. Do not invent extra callback, scope, or claim requirements.
-- OpenID or custom-protocol providers: only assume the documented allauth integration points. If the task needs protocol details beyond allauth's docs, say that upstream provider documentation is required.
-
-## Catalog View
-
-- OpenID Connect family: OpenID Connect plus enterprise-provider variants represented through allauth's provider model.
-- SAML: SAML-based providers supported through allauth's SAML surface.
-- Major OAuth providers: Google, Apple, GitHub, Microsoft.
-- Other documented OAuth providers: treat them as part of the broader provider catalog, grouped by protocol family instead of pretending each one needs a separate deep guide here.
+- Provider discovery or “is this documented by allauth?” -> stay here.
+- Mainstream OAuth provider setup -> `references/providers-major.md`.
+- Enterprise OIDC or multiple OIDC subproviders -> `references/providers-major.md`.
+- SAML organization or metadata questions -> `references/providers-major.md`.
+- If the task exceeds documented allauth integration points, say upstream provider docs are required instead of guessing.
 
 ## Boundary Reminders
 
-- Many production failures are not truly provider-specific; they are `SocialApp`, settings-vs-database, `django.contrib.sites`, or callback URL alignment problems.
+- Many production failures are really `SocialApp`, settings-vs-database, `django.contrib.sites`, or callback URL alignment issues.
 - Do not confuse external-provider consumer login under `socialaccount` with django-allauth identity-provider mode under `allauth.idp`.

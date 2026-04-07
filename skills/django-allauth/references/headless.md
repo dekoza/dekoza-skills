@@ -2,27 +2,35 @@
 
 Use this file for `allauth.headless` installation, configuration, documented API surface, CORS, adapters, and token strategies.
 
-## Owns
+## Owning Surface
 
-- `allauth.headless` setup and documented API behavior
-- Cross-origin and CORS assumptions for SPA/mobile clients
-- Headless adapter hooks and token strategy selection
+- `allauth.headless` owns SPA, mobile, and API-first authentication guidance.
+- Do not answer these questions with only server-rendered account-view advice.
+
+## Token Strategies
+
+### Session Tokens
+
+- For non-browser contexts, allauth uses the `X-Session-Token` request header to track authentication state.
+- The docs recommend reusing `X-Session-Token` for your own API as the simplest path if you do not need another strategy.
+- Documented integrations exist for Django Ninja and Django REST framework.
+
+### JWT Tokens
+
+- The user still sends `X-Session-Token` until they become fully authenticated.
+- Once fully authenticated, the response includes an access-token and refresh-token pair in `meta`.
+- Important settings include `HEADLESS_JWT_ALGORITHM`, `HEADLESS_JWT_PRIVATE_KEY`, `HEADLESS_JWT_ACCESS_TOKEN_EXPIRES_IN`, `HEADLESS_JWT_REFRESH_TOKEN_EXPIRES_IN`, `HEADLESS_JWT_AUTHORIZATION_HEADER_SCHEME`, `HEADLESS_JWT_STATEFUL_VALIDATION_ENABLED`, and `HEADLESS_JWT_ROTATE_REFRESH_TOKEN`.
+- JWT is not truly stateless when you need logout to invalidate outstanding access tokens; the docs say state is still required in that case.
 
 ## Boundary Rules
 
-- This is the owning surface for SPA/mobile/API authentication questions.
-- Do not answer headless questions with only server-rendered account-view guidance.
+- Keep CORS explicit for SPA/mobile setups.
+- Distinguish browser session auth from headless session-token auth.
 - Distinguish session-token and JWT-token strategies explicitly.
-- Keep CORS and cross-origin assumptions explicit.
-
-## Read This First For
-
-- "How should an SPA authenticate with django-allauth?"
-- "Should this project use a session token strategy or JWT token strategy?"
-- "Where do headless adapter and cross-origin settings belong?"
+- Release notes matter here because `HEADLESS_CLIENTS`, spec serving, and JWT support changed recently.
 
 ## Routing
 
 - Server-rendered signup/login/email flows -> `references/account.md`
-- DRF architecture outside documented allauth headless surface -> pair `drf`
-- Release-sensitive headless behavior -> `references/version-notes.md`
+- DRF architecture outside documented allauth headless support -> pair `drf`
+- Release-sensitive token strategy behavior -> `references/version-notes.md`

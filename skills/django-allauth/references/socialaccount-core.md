@@ -2,24 +2,46 @@
 
 Use this file for third-party account architecture, `SocialApp`, provider configuration, linking/disconnecting flows, social forms, social signals, adapters, and advanced socialaccount usage.
 
-## Owns
+## Primary Settings And Extension Points
 
-- Social login concepts and configuration
-- `SocialApp` and provider configuration boundaries
-- Linking, disconnecting, signup handoff, verified-email assumptions, adapters, forms, and signals
+- `SOCIALACCOUNT_ADAPTER`
+- `SOCIALACCOUNT_AUTO_SIGNUP`
+- `SOCIALACCOUNT_EMAIL_AUTHENTICATION`
+- `SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT`
+- `SOCIALACCOUNT_EMAIL_VERIFICATION`
+- `SOCIALACCOUNT_FORMS`
+- `SOCIALACCOUNT_LOGIN_ON_GET`
+- `SOCIALACCOUNT_PROVIDERS`
+- `SOCIALACCOUNT_STORE_TOKENS`
+- `SOCIALACCOUNT_ONLY`
+- `SOCIALACCOUNT_OPENID_CONNECT_URL_PREFIX`
 
-## Boundary Rules
+## Provider Configuration Rules
 
-- `socialaccount` is consumer mode: logging in with an external provider.
-- Do not confuse this with `allauth.idp`, where django-allauth acts as the identity provider.
-- Verify whether provider configuration lives in settings or database-backed `SocialApp` records.
-- Treat multi-site behavior as a real source of production-only failures.
+- A provider app is configured either in settings or through a database-backed `SocialApp`.
+- Do not configure the same provider both ways; the docs warn this can produce `MultipleObjectsReturned`.
+- `SocialApp` supports `django.contrib.sites`, so multi-site failures are often really site-assignment failures.
+- Callback URL alignment is a first-class failure boundary owned by allauth configuration, not generic OAuth folklore.
 
-## Read This First For
+## Owning Surface Boundaries
 
-- "How do I configure Google/GitHub/etc. login in allauth?"
-- "Why does provider login work on one domain but not another?"
-- "How do connect and disconnect flows behave?"
+- `socialaccount` is consumer mode: the user logs in with an external provider.
+- This is not `allauth.idp`, where django-allauth acts as the identity-provider.
+- Provider-specific scopes, claims, callback formats, or tenant rules belong in provider docs. Do not guess them from generic OAuth knowledge.
+
+## Common Flows
+
+- Login/signup via external provider
+- Connect an additional provider account to an existing user
+- Disconnect a provider account
+- Auto-signup and email-authentication decisions after provider response
+
+## Social Signals
+
+- `pre_social_login`
+- `social_account_added`
+- `social_account_updated`
+- `social_account_removed`
 
 ## Routing
 

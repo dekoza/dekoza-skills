@@ -2,79 +2,64 @@
 
 Use this file for providers and protocols where configuration mistakes are common and expensive.
 
-## Covered In Depth
-
-- Google
-- Apple
-- GitHub
-- Microsoft
-- OpenID Connect
-- SAML
-- Enterprise OIDC setups such as Auth0- or Keycloak-class integrations when they are represented by allauth's provider model
-
-## What Each Section Must Capture
-
-1. Configuration shape in allauth terms.
-2. Common callback or redirect mismatch failures.
-3. Scope, claims, or verified-email assumptions when upstream docs mention them.
-4. Multi-site or multi-tenant pitfalls where applicable.
-
-## Boundary Rules
-
-- Keep provider guidance grounded in documented allauth behavior.
-- Do not collapse enterprise OIDC consumer setup into IdP mode.
-- When a provider question is really about `SocialApp`, sites, or callback routing, say so directly.
-
 ## Google
 
-- Configuration shape: verify whether credentials live in provider settings or database-backed `SocialApp` records, and confirm the correct site association when `django.contrib.sites` is in play.
-- Common failures: redirect URI mismatch, callback URL using the wrong domain, or production site records pointing at a different host than the provider console allows.
-- Assumptions to verify: do not promise scopes, claims, or verified-email semantics beyond what upstream docs and allauth docs state.
-- Multi-site pitfall: one Google app can appear broken only on some domains when the active site or callback host does not match the configured `SocialApp`.
+- Provider app: `allauth.socialaccount.providers.google`.
+- Callback: `/accounts/google/login/callback/`.
+- Supported settings include `SCOPE`, `AUTH_PARAMS`, `OAUTH_PKCE_ENABLED`, and `FETCH_USERINFO`.
+- To receive a refresh token, set `AUTH_PARAMS['access_type'] = 'offline'`.
+- If avatars or other profile data are missing, `FETCH_USERINFO` may be relevant because allauth otherwise relies mainly on the ID token payload.
 
 ## Apple
 
-- Configuration shape: keep the allauth-side provider configuration separate from Apple console setup and verify that the configured callback target matches the deployed site.
-- Common failures: callback mismatch, wrong service identifiers, or environment drift between local and production domains.
-- Assumptions to verify: do not invent email or claim behavior; only repeat documented allauth and upstream Apple requirements.
-- Multi-site pitfall: Apple login is especially brittle when callback routing is copied across environments without checking the active site domain.
+- Uses `SOCIALACCOUNT_PROVIDERS['apple']['APPS']`.
+- `client_id` is the Apple service identifier.
+- `secret` is the Apple key ID.
+- `key` is the member ID / app ID prefix.
+- Per-app `settings.certificate_key` holds the downloaded private key.
+- If you support both Services ID and Bundle ID, add multiple app entries; the Bundle ID entry may need `"hidden": True` so it does not appear on the web.
+- Apple login uses a cross-origin POST. Session/cookie issues can surface as `PermissionDenied` if middleware creates a new session on that POST.
 
 ## GitHub
 
-- Configuration shape: confirm provider credentials, `SocialApp` placement, and the current site mapping before blaming generic OAuth behavior.
-- Common failures: callback URL mismatch, stale credentials in admin vs settings, or the wrong site record being active.
-- Assumptions to verify: only assert scope and verified-email behavior when upstream docs mention it.
-- Multi-site pitfall: one GitHub OAuth app often gets reused across domains incorrectly; callback alignment breaks first.
+- Callback: `/accounts/github/login/callback/`.
+- Optional `SCOPE` is documented.
+- Enterprise GitHub uses `GITHUB_URL`; do not assume github.com defaults apply.
 
 ## Microsoft
 
-- Configuration shape: treat Microsoft login as a provider-configuration problem first, including credential storage, site mapping, and callback registration.
-- Common failures: redirect mismatch, tenant-specific console setup drift, and credentials bound to a different deployment host.
-- Assumptions to verify: do not guess claims, tenant behavior, or verified-email semantics that allauth does not document.
-- Multi-site pitfall: tenant and site mismatches can look like intermittent login failures across environments.
+- The Microsoft provider documents app-level settings such as `tenant`, `login_url`, and `graph_url`.
+- Single-tenant apps may need `tenant = "organizations"` to avoid `AADSTS50194`.
+- If the deployment is really an enterprise OIDC integration with its own issuer metadata, route through OpenID Connect configuration rather than forcing generic Microsoft assumptions.
 
 ## OpenID Connect
 
-- Configuration shape: this is consumer social login through `socialaccount`, not allauth acting as an identity provider. Verify the allauth provider model, credential placement, issuer-related configuration, and site mapping.
-- Common failures: callback mismatch, wrong issuer metadata, stale credentials, or mixing provider-console configuration with allauth IdP assumptions.
-- Assumptions to verify: scopes, claims, and email-verification assumptions must come from upstream provider docs plus the documented allauth surface.
-- Multi-site pitfall: enterprise deployments often fail only on one tenant or domain because callback URLs and site records drift apart.
+- Consumer login surface under `socialaccount`, not IdP mode.
+- Uses `SOCIALACCOUNT_PROVIDERS['openid_connect']['APPS']`.
+- Each app can define `provider_id`, `name`, `client_id`, `secret`, and `settings.server_url`.
+- Documented optional settings include `fetch_userinfo`, `oauth_pkce_enabled`, `token_auth_method`, and `uid_field`.
+- Callback format is `/accounts/oidc/{provider_id}/login/callback/`.
+- Release notes matter here: `fetch_userinfo=False` behavior and `uid_field` support changed in recent releases.
 
 ## SAML
 
-- Configuration shape: keep the allauth SAML consumer configuration distinct from any idea that django-allauth is acting as the identity provider.
-- Common failures: callback or assertion-consumer URL mismatch, stale metadata, wrong entity ID, or site/domain drift between environments.
-- Assumptions to verify: only state claim or attribute mapping behavior that the docs actually support.
-- Multi-site pitfall: SAML setups often break at the boundary between site records, environment-specific metadata, and tenant-specific IdP configuration.
+- Requires installing `django-allauth[saml]`.
+- allauth models SAML by organization/app, typically one app per organization.
+- `client_id` is the organization slug used in endpoints such as `/accounts/saml/<organization_slug>/login/`.
+- `provider_id` is the provider identifier used on `SocialAccount.provider`; the IdP entity ID is a suitable choice.
+- `settings.attribute_mapping` controls `uid`, `email`, and related attribute extraction.
+- Other documented settings include `use_nameid_for_email`, `idp`, `sp`, `advanced`, and `contact_person`.
+- Core endpoints include `/accounts/saml/<organization_slug>/login/`, `/accounts/saml/<organization_slug>/acs/`, `/accounts/saml/<organization_slug>/sls/`, and `/accounts/saml/<organization_slug>/metadata/`.
+- `reject_idp_initiated_sso` defaults to `True`; the docs frame IdP-initiated SSO as a security-sensitive override.
+- HTTPS, reverse-proxy headers, secure cookies, and tools like SAML Tracer are part of the official troubleshooting guidance.
 
-## Enterprise OIDC
+## Enterprise OIDC Boundary
 
-- This covers Auth0-class or Keycloak-class integrations when they are represented by allauth's OpenID Connect provider model.
-- Treat these as consumer login setups under `socialaccount`; do not collapse them into allauth IdP mode.
-- Most failures are still boundary failures: `SocialApp` placement, settings-vs-database drift, callback registration, site mapping, tenant-specific issuer metadata, and environment-specific redirect hosts.
-- When the real problem is multi-tenant site routing or callback alignment, say that directly instead of inventing provider magic.
+- Auth0, Keycloak, Okta, and NetIQ often behave like enterprise OIDC setups.
+- Treat them as consumer login under `socialaccount`, not as allauth IdP mode.
+- Release notes matter: Okta and NetIQ switched from mutable `preferred_username` to `sub`, and `uid_field` was later added for controlled overrides.
 
 ## Escalation Rules
 
-- If the question is mostly about credential placement, site records, or callback routing, pair this file with `references/socialaccount-core.md` or `references/installation-and-wiring.md`.
-- If the question is about django-allauth acting as the provider, route to `references/idp-openid-connect.md` instead of answering from a consumer-provider perspective.
+- If the real problem is callback registration, `SITE_ID`, or `SocialApp` placement, pair this file with `references/socialaccount-core.md` or `references/installation-and-wiring.md`.
+- If django-allauth is acting as the provider, route to `references/idp-openid-connect.md`.

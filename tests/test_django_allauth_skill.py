@@ -46,6 +46,8 @@ def test_django_allauth_skill_guardrails_cover_core_boundary_footguns() -> None:
     assert "SocialApp" in skill_text
     assert "django.contrib.sites" in skill_text or "multi-site" in skill_text
     assert "version-notes.md" in skill_text
+    assert "providers-index.md" in skill_text
+    assert "settings, adapters, forms, signals, templates" in skill_text
 
 
 def test_django_allauth_skill_routes_to_neighbor_skills_when_needed() -> None:
@@ -114,6 +116,11 @@ def test_django_allauth_reference_files_cover_core_topics() -> None:
     assert "INSTALLED_APPS" in installation_text
     assert "SITE_ID" in installation_text or "django.contrib.sites" in installation_text
     assert "headless" in installation_text and "mfa" in installation_text
+    assert "django.template.context_processors.request" in installation_text
+    assert "allauth.account.auth_backends.AuthenticationBackend" in installation_text
+    assert "allauth.account.middleware.AccountMiddleware" in installation_text
+    assert "path('accounts/', include('allauth.urls'))" in installation_text
+    assert "django.contrib.sessions.backends.signed_cookies" in installation_text
 
     assert "signup" in account_text.lower()
     assert "email" in account_text.lower()
@@ -121,17 +128,41 @@ def test_django_allauth_reference_files_cover_core_topics() -> None:
     assert "signal" in account_text.lower()
     assert "phone" in account_text.lower()
     assert "enumeration" in account_text.lower() or "rate limit" in account_text.lower()
+    assert "ACCOUNT_SIGNUP_FORM_CLASS" in account_text
+    assert "ACCOUNT_SIGNUP_FIELDS" in account_text
+    assert "ACCOUNT_LOGIN_METHODS" in account_text
+    assert "ACCOUNT_EMAIL_VERIFICATION" in account_text
+    assert "ACCOUNT_PREVENT_ENUMERATION" in account_text
+    assert "ACCOUNT_RATE_LIMITS" in account_text
+    assert "authentication_step_completed" in account_text
+    assert "email_confirmation_sent" in account_text
+    assert "email_removed" in account_text
 
     assert "SocialApp" in social_text
     assert "provider" in social_text.lower()
     assert "connect" in social_text.lower() or "disconnect" in social_text.lower()
     assert "adapter" in social_text.lower()
     assert "signal" in social_text.lower()
+    assert "SOCIALACCOUNT_ADAPTER" in social_text
+    assert "SOCIALACCOUNT_PROVIDERS" in social_text
+    assert "SOCIALACCOUNT_AUTO_SIGNUP" in social_text
+    assert "SOCIALACCOUNT_EMAIL_AUTHENTICATION" in social_text
+    assert "MultipleObjectsReturned" in social_text
+    assert "pre_social_login" in social_text
+    assert "social_account_removed" in social_text
 
     assert "OpenID Connect" in provider_index_text or "OIDC" in provider_index_text
     assert "SAML" in provider_index_text
     assert "Google" in provider_index_text
     assert "Apple" in provider_index_text
+    assert "/accounts/<provider>/login/callback/" in provider_index_text
+    assert "OAuth 2.0" in provider_index_text
+    assert "OAuth 1.0a" in provider_index_text or "OAuth 1a" in provider_index_text
+    assert "OpenID" in provider_index_text
+    assert "Auth0" in provider_index_text
+    assert "Keycloak" in provider_index_text
+    assert "Okta" in provider_index_text
+    assert "NetIQ" in provider_index_text or "Microfocus" in provider_index_text
 
     assert "Google" in provider_major_text
     assert "Apple" in provider_major_text
@@ -140,29 +171,73 @@ def test_django_allauth_reference_files_cover_core_topics() -> None:
     assert "OpenID Connect" in provider_major_text or "OIDC" in provider_major_text
     assert "SAML" in provider_major_text
     assert "Auth0" in provider_major_text or "Keycloak" in provider_major_text
+    assert "OAUTH_PKCE_ENABLED" in provider_major_text
+    assert "FETCH_USERINFO" in provider_major_text
+    assert "access_type" in provider_major_text and "offline" in provider_major_text
+    assert "certificate_key" in provider_major_text
+    assert '"hidden": True' in provider_major_text or "hidden" in provider_major_text
+    assert "GITHUB_URL" in provider_major_text
+    assert "provider_id" in provider_major_text and "server_url" in provider_major_text
+    assert "/accounts/oidc/{provider_id}/login/callback/" in provider_major_text
+    assert "reject_idp_initiated_sso" in provider_major_text
+    assert "attribute_mapping" in provider_major_text
+    assert "/accounts/saml/<organization_slug>/acs/" in provider_major_text
 
     assert "WebAuthn" in mfa_text
     assert "adapter" in mfa_text.lower()
     assert "form" in mfa_text.lower()
+    assert "allauth.mfa" in mfa_text
+    assert "django-allauth-2fa" in mfa_text
+    assert "get_totp_issuer" in mfa_text
+    assert "generate_authenticator_name" in mfa_text
 
     assert "session" in usersessions_text.lower()
     assert "signal" in usersessions_text.lower()
     assert "adapter" in usersessions_text.lower()
+    assert "django.contrib.humanize" in usersessions_text
+    assert "allauth.usersessions" in usersessions_text
+    assert "UserSessionsMiddleware" in usersessions_text
+    assert "USERSESSIONS_TRACK_ACTIVITY" in usersessions_text
+    assert "session_client_changed" in usersessions_text
 
     assert "CORS" in headless_text
     assert "JWT" in headless_text or "session token" in headless_text.lower()
     assert "token strategy" in headless_text.lower()
     assert "adapter" in headless_text.lower()
+    assert "X-Session-Token" in headless_text
+    assert "HEADLESS_JWT_ALGORITHM" in headless_text
+    assert "HEADLESS_JWT_PRIVATE_KEY" in headless_text
+    assert "HEADLESS_JWT_STATEFUL_VALIDATION_ENABLED" in headless_text
+    assert "HEADLESS_JWT_ROTATE_REFRESH_TOKEN" in headless_text
+    assert (
+        "not truly stateless" in headless_text.lower()
+        or "stateless" in headless_text.lower()
+    )
 
     assert "identity provider" in idp_text.lower() or "IdP" in idp_text
     assert "OpenID Connect" in idp_text or "OIDC" in idp_text
     assert "client" in idp_text.lower()
     assert "socialaccount" in idp_text
+    assert "allauth.idp.oidc" in idp_text
+    assert "IDP_OIDC_PRIVATE_KEY" in idp_text
+    assert 'path("", include("allauth.idp.urls"))' in idp_text
+    assert "/.well-known/openid-configuration" in idp_text
+    assert "/identity/o/api/token" in idp_text
+    assert "IDP_OIDC_ACCESS_TOKEN_EXPIRES_IN" in idp_text
+    assert "IDP_OIDC_USERINFO_ENDPOINT" in idp_text
 
     assert "template" in common_text.lower()
     assert "message" in common_text.lower()
     assert "admin" in common_text.lower()
     assert "email" in common_text.lower()
+    assert "allauth/layouts/base.html" in common_text
+    assert "allauth/layouts/entrance.html" in common_text
+    assert "allauth/layouts/manage.html" in common_text
+    assert "send_mail" in common_text
+    assert "429.html" in common_text
+    assert "ALLAUTH_TRUSTED_PROXY_COUNT" in common_text
+    assert "ALLAUTH_TRUSTED_CLIENT_IP_HEADER" in common_text
+    assert "DummyCache" in common_text
 
     assert "callback" in testing_text.lower()
     assert "site" in testing_text.lower()
@@ -171,11 +246,21 @@ def test_django_allauth_reference_files_cover_core_topics() -> None:
         or "email verification" in testing_text.lower()
     )
     assert "headless" in testing_text.lower()
+    assert "SocialApp" in testing_text
+    assert "settings" in testing_text.lower()
+    assert "SITE_ID" in testing_text or "django.contrib.sites" in testing_text
+    assert "token strategy" in testing_text.lower()
+    assert "signed_cookies" in testing_text
 
     assert "release" in version_text.lower()
     assert "headless" in version_text.lower()
     assert "mfa" in version_text.lower()
     assert "usersessions" in version_text.lower()
+    assert "65.13.0" in version_text
+    assert "65.14.0" in version_text
+    assert "65.15.0" in version_text
+    assert "IDP" in version_text or "identity provider" in version_text.lower()
+    assert "rate limit" in version_text.lower()
 
 
 def test_django_allauth_skill_evals_cover_core_risk_areas() -> None:
@@ -206,6 +291,14 @@ def test_django_allauth_skill_evals_cover_core_risk_areas() -> None:
         "callback" in prompt.lower() or "SITE_ID" in prompt for prompt in prompts
     )
     assert all(item["expectations"] and item["expected_output"] for item in evals)
+    assert any(
+        "settings or SocialApp" in prompt or "SocialApp" in prompt for prompt in prompts
+    )
+    assert any("JWT" in prompt and "X-Session-Token" in prompt for prompt in prompts)
+    assert any(
+        "identity provider" in prompt.lower() and "OpenID Connect" in prompt
+        for prompt in prompts
+    )
 
 
 def test_django_allauth_evals_target_discriminating_failure_modes() -> None:
@@ -231,3 +324,9 @@ def test_django_allauth_evals_target_discriminating_failure_modes() -> None:
         "provider-specific" in expectations.lower()
         or "do not guess" in expectations.lower()
     )
+    assert "owning allauth surface" in expectations or "owning surface" in expectations
+    assert (
+        "settings-vs-database" in expectations
+        or "settings-vs-SocialApp" in expectations
+    )
+    assert "X-Session-Token" in expectations or "session token" in expectations.lower()

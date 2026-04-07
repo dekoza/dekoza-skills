@@ -9,30 +9,30 @@ source_basis: official docs + source repository
 
 # Django-Allauth Reference
 
-Use this skill for `django-allauth` integration, customization, and debugging. Start by identifying which allauth surface the task belongs to, then read only the matching reference file or files.
+Use this skill for `django-allauth` integration, customization, and debugging. Identify the owning allauth surface first, then read only the matching reference file or files.
 
 ## Quick Start
 
 1. Decide whether the task is about installation, `account`, `socialaccount`, providers, `mfa`, `usersessions`, `headless`, `idp`, shared customization, or troubleshooting.
 2. Open one primary reference file first.
-3. Add a second reference only when provider-specific, release-sensitive, or neighboring-subsystem boundaries change the answer.
+3. Add a second reference only when provider-specific behavior, `SocialApp` or `django.contrib.sites` boundaries, or recent release changes materially affect the answer.
 
 ## When Not To Use This Skill
 
 - Core Django behavior outside allauth extension points -> pair `django`
-- Broad DRF architecture unrelated to `allauth.headless` -> pair `drf`
+- Broad DRF API architecture unrelated to `allauth.headless` -> pair `drf`
 - Pure response-code semantics -> pair `http-status-codes`
 - Generic OAuth/OIDC/SAML theory with no allauth integration work -> use upstream protocol docs
 
 ## Critical Rules
 
-1. **Verify installed allauth apps before giving guidance** - Do not assume `mfa`, `usersessions`, `headless`, or `idp` are enabled just because a project uses allauth.
-2. **Do not confuse consumer social login with identity-provider mode** - `socialaccount` handles logging in with external providers; `idp` handles allauth acting as a provider.
-3. **Do not confuse session/browser auth with headless token auth** - load `references/headless.md` for SPA/mobile/API authentication.
-4. **Prefer the existing extension point** - Before suggesting view overrides, verify whether the behavior belongs in settings, adapters, forms, signals, templates, or `SocialApp` configuration.
-5. **Do not guess provider-specific requirements** - Route through provider references instead of inventing callbacks, scopes, or claims behavior.
-6. **Treat multi-site/provider configuration carefully** - Verify whether behavior belongs in settings, database-backed `SocialApp`, or `django.contrib.sites` setup.
-7. **Use version-aware guidance** - When behavior may have changed recently, check `references/version-notes.md`.
+1. **Verify installed allauth apps before giving guidance** - Do not assume `socialaccount`, `mfa`, `usersessions`, `headless`, or `allauth.idp.oidc` are enabled just because a project uses allauth.
+2. **Do not confuse consumer social login with identity-provider mode** - `socialaccount` handles logging in with external providers; `idp` handles django-allauth acting as the identity-provider.
+3. **Do not confuse session/browser auth with headless token auth** - load `references/headless.md` for SPA/mobile/API authentication, including `X-Session-Token` and JWT strategy boundaries.
+4. **Prefer the existing extension point** - Before suggesting view overrides, verify whether the behavior belongs in settings, adapters, forms, signals, templates, or `SocialApp` configuration. Default to settings, adapters, forms, signals, templates before custom views.
+5. **Do not guess provider-specific requirements** - Route through `references/providers-index.md` and provider references instead of inventing callbacks, scopes, claims behavior, or console setup.
+6. **Treat multi-site/provider configuration carefully** - Verify whether behavior belongs in settings, database-backed `SocialApp`, or `django.contrib.sites` / `SITE_ID` setup.
+7. **Use version-aware guidance** - When behavior may have changed recently, check `references/version-notes.md`, especially for headless, IdP, MFA, proxy-aware rate limits, and provider UID handling.
 
 ## Reference Map
 
@@ -42,7 +42,7 @@ Use this skill for `django-allauth` integration, customization, and debugging. S
 | `references/installation-and-wiring.md` | Setup | App wiring, URLs, sites, provider enablement |
 | `references/account.md` | Regular accounts | Signup, login, email, password, phone, adapters |
 | `references/socialaccount-core.md` | Social login | `SocialApp`, linking, disconnecting, adapters |
-| `references/providers-index.md` | Provider catalog | Full provider routing by protocol family |
+| `references/providers-index.md` | Provider catalog | Provider-family routing and callback patterns |
 | `references/providers-major.md` | Deep providers | Google, Apple, GitHub, Microsoft, OIDC, SAML |
 | `references/mfa.md` | MFA | TOTP/WebAuthn, forms, adapters |
 | `references/usersessions.md` | Sessions | Session tracking, listing, revocation |
@@ -57,7 +57,7 @@ Use this skill for `django-allauth` integration, customization, and debugging. S
 - Setup, URLs, `INSTALLED_APPS`, sites, email prerequisites -> `references/installation-and-wiring.md`
 - Signup/login/logout/password reset/email verification/email management/phone -> `references/account.md`
 - Social login architecture, account linking, disconnecting, generic provider setup -> `references/socialaccount-core.md`
-- Provider discovery or full provider catalog questions -> `references/providers-index.md`
+- Provider discovery, provider-family routing, or callback pattern questions -> `references/providers-index.md`
 - Google, Apple, GitHub, Microsoft, OIDC, or SAML questions -> `references/providers-major.md`
 - MFA, WebAuthn, or reauthentication -> `references/mfa.md`
 - Session tracking or session revocation -> `references/usersessions.md`

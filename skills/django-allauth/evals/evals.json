@@ -4,94 +4,102 @@
     {
       "id": 1,
       "prompt": "I need to customize django-allauth signup so we collect a required company name, save it on the user profile, and still keep the built-in email verification flow. Should I override the signup view, the form, or an adapter?",
-      "expected_output": "The response routes to regular account guidance, prefers the existing extension point instead of a view override, and explains how signup customization coexists with email verification.",
+      "expected_output": "The response identifies `account` as the owning allauth surface, prefers the documented signup extension points over a custom view override, and keeps email verification behavior explicit.",
       "files": [],
       "expectations": [
-        "It treats this as an `account` question rather than a generic Django auth question.",
-        "It prefers an existing extension point such as a signup form and/or adapter over overriding the built-in view without cause.",
-        "It keeps email verification behavior explicit instead of ignoring it."
+        "It identifies `account` as the owning allauth surface rather than a generic Django auth question.",
+        "It prefers existing extension points such as settings, adapters, forms, signals, templates over overriding the built-in view without cause.",
+        "It mentions `ACCOUNT_SIGNUP_FORM_CLASS` and/or `ACCOUNT_ADAPTER` as the likely extension point.",
+        "It keeps `ACCOUNT_EMAIL_VERIFICATION` or email verification behavior explicit instead of ignoring it."
       ]
     },
     {
       "id": 2,
       "prompt": "Our Google login works locally but production keeps failing after redirect. We have a SocialApp in admin, multiple domains, and I am not sure whether this is a SITE_ID problem, a callback URL problem, or provider configuration living in the wrong place. What should I verify first?",
-      "expected_output": "The response treats this as a socialaccount plus provider-configuration troubleshooting problem and checks sites, callback URLs, and SocialApp placement without inventing Google-specific behavior.",
+      "expected_output": "The response treats this as a `socialaccount` plus provider-configuration boundary problem, checks `SITE_ID`, callback URL alignment, and `SocialApp` assignment first, and avoids invented Google behavior.",
       "files": [],
       "expectations": [
-        "It mentions `SocialApp` or the settings-vs-database provider configuration boundary.",
+        "It identifies `socialaccount` as the owning allauth surface.",
+        "It mentions `SocialApp` and the settings-vs-database configuration boundary.",
         "It mentions `SITE_ID` or `django.contrib.sites` as a likely boundary.",
-        "It mentions site or callback URL alignment as a likely failure boundary.",
-        "It does not hand-wave with generic OAuth advice divorced from django-allauth configuration or guess provider-specific behavior.",
+        "It mentions callback URL alignment before speculative code changes.",
+        "It does not guess provider-specific behavior beyond documented Google/allauth guidance.",
         "It does not confuse provider consumer login with allauth IdP mode."
       ]
     },
     {
       "id": 3,
-      "prompt": "I need enterprise SSO with an OpenID Connect provider, but another teammate says django-allauth can also act as the OpenID provider itself. Explain the difference and point me to the right allauth surface for each case.",
-      "expected_output": "The response cleanly distinguishes consumer socialaccount OIDC login from allauth identity-provider mode and routes each case to the correct reference area.",
+      "prompt": "I need enterprise SSO with an OpenID Connect provider, but another teammate says django-allauth can also act as the OpenID Connect identity provider itself. Explain the difference and point me to the right allauth surface for each case.",
+      "expected_output": "The response cleanly distinguishes `socialaccount` consumer OIDC from allauth IdP mode and routes each case to the correct subsystem.",
       "files": [],
       "expectations": [
-        "It distinguishes `socialaccount` consumer mode from `idp` provider mode.",
-        "It routes the external-provider login case through OIDC/socialaccount guidance.",
-        "It routes the 'allauth as provider' case through the IdP reference instead of mixing the two.",
-        "It mentions `SocialApp` or the settings-vs-database provider configuration boundary.",
-        "It mentions site or callback URL alignment as a likely failure boundary.",
-        "It does not confuse provider consumer login with allauth IdP mode."
+        "It distinguishes external-provider login under `socialaccount` from identity-provider mode under `allauth.idp.oidc`.",
+        "It identifies the owning allauth surface for each half of the question.",
+        "It routes enterprise consumer login through OpenID Connect/socialaccount guidance.",
+        "It routes 'allauth as provider' through the IdP reference instead of mixing the two.",
+        "It does not answer in vague protocol-only terms divorced from allauth surfaces."
       ]
     },
     {
       "id": 4,
-      "prompt": "We are building a React SPA against django-allauth and need API authentication. Some examples online talk about normal login sessions, others about headless JWT, and someone also suggested CSRF cookies. What belongs to django-allauth headless here and what does not?",
-      "expected_output": "The response treats this as a headless/API question, covers token-strategy choices and CORS, and does not collapse the answer into browser-session guidance.",
+      "prompt": "We are building a React SPA against django-allauth and need API authentication. Some examples online talk about normal login sessions, others about headless JWT, and someone also suggested sending X-Session-Token during the flow. What belongs to django-allauth headless here and what does not?",
+      "expected_output": "The response identifies `headless` as the owning allauth surface, distinguishes `X-Session-Token` session-token flows from JWT flows, mentions CORS, and does not collapse the answer into browser-session guidance.",
       "files": [],
       "expectations": [
-        "It routes the task to `headless` rather than regular account views.",
-        "It mentions token strategies such as session tokens and/or JWT.",
-        "It mentions CORS and does not treat this as ordinary server-rendered browser auth."
+        "It identifies `headless` as the owning allauth surface.",
+        "It mentions `X-Session-Token` as part of the documented session-token strategy.",
+        "It mentions JWT settings or JWT-token strategy boundaries.",
+        "It mentions CORS and does not treat this as ordinary server-rendered browser auth.",
+        "It does not claim JWT is fully stateless without qualification."
       ]
     },
     {
       "id": 5,
       "prompt": "I want to enable MFA with WebAuthn in django-allauth, but the project also has old notes about django-allauth-2fa. What is the current allauth surface I should use, and where do forms or adapters come into play?",
-      "expected_output": "The response routes to the MFA surface, mentions WebAuthn, and treats old allauth-2fa migration notes as legacy context rather than the primary implementation path.",
+      "expected_output": "The response routes to `allauth.mfa`, mentions WebAuthn, and treats `django-allauth-2fa` as migration context rather than the primary path.",
       "files": [],
       "expectations": [
-        "It routes the answer through `mfa`.",
-        "It mentions WebAuthn.",
-        "It mentions forms and/or adapters as extension points."
+        "It identifies `mfa` as the owning allauth surface.",
+        "It mentions WebAuthn explicitly.",
+        "It mentions forms and/or adapter hooks such as `MFA_ADAPTER`.",
+        "It keeps legacy `django-allauth-2fa` notes in migration context only."
       ]
     },
     {
       "id": 6,
       "prompt": "Product wants users to see and revoke their active sessions. Is that regular Django session middleware, django-allauth account functionality, or something under usersessions? What hooks or signals matter?",
-      "expected_output": "The response identifies `usersessions` as the owning allauth surface and explains the relevant installation/configuration and extension points.",
+      "expected_output": "The response identifies `usersessions` as the owning allauth surface, explains that it must be installed explicitly, and mentions its configuration and signals.",
       "files": [],
       "expectations": [
-        "It identifies `usersessions` as the relevant allauth surface.",
-        "It mentions installation/configuration rather than pretending this is automatically present.",
-        "It mentions signals and/or adapters if they are part of the surface."
+        "It identifies `usersessions` as the owning allauth surface.",
+        "It mentions installation/configuration instead of pretending this is automatically present.",
+        "It mentions `USERSESSIONS_TRACK_ACTIVITY` and/or `UserSessionsMiddleware` if activity tracking is discussed.",
+        "It mentions `session_client_changed` and/or the usersessions adapter surface."
       ]
     },
     {
       "id": 7,
       "prompt": "Our django-allauth tests keep failing around email confirmation and password reset links. Sometimes the callback host is wrong, sometimes the links point at localhost, and sometimes provider callbacks break only in CI. Give me a troubleshooting checklist that starts with the most likely configuration boundaries.",
-      "expected_output": "The response provides a configuration-boundary troubleshooting checklist centered on sites, callback URLs, email verification flows, and environment-specific provider setup.",
+      "expected_output": "The response gives a configuration-boundary checklist centered on owning surface selection, `SITE_ID`, callback URLs, `SocialApp` placement, and email-link generation.",
       "files": [],
       "expectations": [
-        "It mentions site configuration and callback URL boundaries.",
-        "It mentions email confirmation or verification flows explicitly.",
-        "It keeps the diagnosis grounded in django-allauth configuration rather than only generic Django testing advice."
+        "It starts with the owning allauth surface instead of generic Django debugging.",
+        "It mentions `SITE_ID` or `django.contrib.sites`.",
+        "It mentions callback URL boundaries.",
+        "It mentions `SocialApp` or settings-vs-database config placement.",
+        "It mentions email confirmation or password-reset link generation explicitly.",
+        "It does not make up provider behavior to explain failures."
       ]
     },
     {
       "id": 8,
       "prompt": "I found a blog post from 2024 about django-allauth headless and rate limits, but our installed version is much newer. Before I follow it, what should I verify in the release notes or current docs so I do not cargo-cult stale behavior?",
-      "expected_output": "The response treats this as a version-sensitive question, routes to release-note awareness, and warns against asserting behavior without checking the current docs/source snapshot.",
+      "expected_output": "The response treats this as version-sensitive, points to release-note verification, and names the high-drift subsystems that changed recently.",
       "files": [],
       "expectations": [
         "It tells the reader to verify release notes or current docs before trusting older guidance.",
-        "It mentions recent surfaces such as headless, MFA, usersessions, or rate-limit-related changes as likely drift areas.",
-        "It does not present stale blog-post behavior as authoritative."
+        "It mentions recent drift areas such as headless, MFA, usersessions, IdP, or rate-limit proxy handling.",
+        "It mentions version-sensitive settings or recent releases instead of presenting stale behavior as authoritative."
       ]
     }
   ]
