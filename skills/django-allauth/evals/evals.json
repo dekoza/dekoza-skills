@@ -18,9 +18,11 @@
       "expected_output": "The response treats this as a socialaccount plus provider-configuration troubleshooting problem and checks sites, callback URLs, and SocialApp placement without inventing Google-specific behavior.",
       "files": [],
       "expectations": [
-        "It mentions `SocialApp` explicitly.",
+        "It mentions `SocialApp` or the settings-vs-database provider configuration boundary.",
         "It mentions `SITE_ID` or `django.contrib.sites` as a likely boundary.",
-        "It does not hand-wave with generic OAuth advice divorced from django-allauth configuration or guess provider-specific behavior."
+        "It mentions site or callback URL alignment as a likely failure boundary.",
+        "It does not hand-wave with generic OAuth advice divorced from django-allauth configuration or guess provider-specific behavior.",
+        "It does not confuse provider consumer login with allauth IdP mode."
       ]
     },
     {
@@ -31,7 +33,10 @@
       "expectations": [
         "It distinguishes `socialaccount` consumer mode from `idp` provider mode.",
         "It routes the external-provider login case through OIDC/socialaccount guidance.",
-        "It routes the 'allauth as provider' case through the IdP reference instead of mixing the two."
+        "It routes the 'allauth as provider' case through the IdP reference instead of mixing the two.",
+        "It mentions `SocialApp` or the settings-vs-database provider configuration boundary.",
+        "It mentions site or callback URL alignment as a likely failure boundary.",
+        "It does not confuse provider consumer login with allauth IdP mode."
       ]
     },
     {
