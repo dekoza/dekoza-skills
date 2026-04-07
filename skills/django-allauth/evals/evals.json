@@ -1,0 +1,93 @@
+{
+  "skill_name": "django-allauth",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I need to customize django-allauth signup so we collect a required company name, save it on the user profile, and still keep the built-in email verification flow. Should I override the signup view, the form, or an adapter?",
+      "expected_output": "The response routes to regular account guidance, prefers the existing extension point instead of a view override, and explains how signup customization coexists with email verification.",
+      "files": [],
+      "expectations": [
+        "It treats this as an `account` question rather than a generic Django auth question.",
+        "It prefers an existing extension point such as a signup form and/or adapter over overriding the built-in view without cause.",
+        "It keeps email verification behavior explicit instead of ignoring it."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Our Google login works locally but production keeps failing after redirect. We have a SocialApp in admin, multiple domains, and I am not sure whether this is a SITE_ID problem, a callback URL problem, or provider configuration living in the wrong place. What should I verify first?",
+      "expected_output": "The response treats this as a socialaccount plus provider-configuration troubleshooting problem and checks sites, callback URLs, and SocialApp placement without inventing Google-specific behavior.",
+      "files": [],
+      "expectations": [
+        "It mentions `SocialApp` explicitly.",
+        "It mentions `SITE_ID` or `django.contrib.sites` as a likely boundary.",
+        "It does not hand-wave with generic OAuth advice divorced from django-allauth configuration or guess provider-specific behavior."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I need enterprise SSO with an OpenID Connect provider, but another teammate says django-allauth can also act as the OpenID provider itself. Explain the difference and point me to the right allauth surface for each case.",
+      "expected_output": "The response cleanly distinguishes consumer socialaccount OIDC login from allauth identity-provider mode and routes each case to the correct reference area.",
+      "files": [],
+      "expectations": [
+        "It distinguishes `socialaccount` consumer mode from `idp` provider mode.",
+        "It routes the external-provider login case through OIDC/socialaccount guidance.",
+        "It routes the 'allauth as provider' case through the IdP reference instead of mixing the two."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "We are building a React SPA against django-allauth and need API authentication. Some examples online talk about normal login sessions, others about headless JWT, and someone also suggested CSRF cookies. What belongs to django-allauth headless here and what does not?",
+      "expected_output": "The response treats this as a headless/API question, covers token-strategy choices and CORS, and does not collapse the answer into browser-session guidance.",
+      "files": [],
+      "expectations": [
+        "It routes the task to `headless` rather than regular account views.",
+        "It mentions token strategies such as session tokens and/or JWT.",
+        "It mentions CORS and does not treat this as ordinary server-rendered browser auth."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I want to enable MFA with WebAuthn in django-allauth, but the project also has old notes about django-allauth-2fa. What is the current allauth surface I should use, and where do forms or adapters come into play?",
+      "expected_output": "The response routes to the MFA surface, mentions WebAuthn, and treats old allauth-2fa migration notes as legacy context rather than the primary implementation path.",
+      "files": [],
+      "expectations": [
+        "It routes the answer through `mfa`.",
+        "It mentions WebAuthn.",
+        "It mentions forms and/or adapters as extension points."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Product wants users to see and revoke their active sessions. Is that regular Django session middleware, django-allauth account functionality, or something under usersessions? What hooks or signals matter?",
+      "expected_output": "The response identifies `usersessions` as the owning allauth surface and explains the relevant installation/configuration and extension points.",
+      "files": [],
+      "expectations": [
+        "It identifies `usersessions` as the relevant allauth surface.",
+        "It mentions installation/configuration rather than pretending this is automatically present.",
+        "It mentions signals and/or adapters if they are part of the surface."
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Our django-allauth tests keep failing around email confirmation and password reset links. Sometimes the callback host is wrong, sometimes the links point at localhost, and sometimes provider callbacks break only in CI. Give me a troubleshooting checklist that starts with the most likely configuration boundaries.",
+      "expected_output": "The response provides a configuration-boundary troubleshooting checklist centered on sites, callback URLs, email verification flows, and environment-specific provider setup.",
+      "files": [],
+      "expectations": [
+        "It mentions site configuration and callback URL boundaries.",
+        "It mentions email confirmation or verification flows explicitly.",
+        "It keeps the diagnosis grounded in django-allauth configuration rather than only generic Django testing advice."
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "I found a blog post from 2024 about django-allauth headless and rate limits, but our installed version is much newer. Before I follow it, what should I verify in the release notes or current docs so I do not cargo-cult stale behavior?",
+      "expected_output": "The response treats this as a version-sensitive question, routes to release-note awareness, and warns against asserting behavior without checking the current docs/source snapshot.",
+      "files": [],
+      "expectations": [
+        "It tells the reader to verify release notes or current docs before trusting older guidance.",
+        "It mentions recent surfaces such as headless, MFA, usersessions, or rate-limit-related changes as likely drift areas.",
+        "It does not present stale blog-post behavior as authoritative."
+      ]
+    }
+  ]
+}
