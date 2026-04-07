@@ -17,12 +17,12 @@ Use this file for `allauth.headless` installation, configuration, documented API
 
 ## Primary Settings To Reach For First
 
-- `HEADLESS_ADAPTER`
-- `HEADLESS_CLIENTS`
-- `HEADLESS_FRONTEND_URLS`
-- `HEADLESS_ONLY`
-- `HEADLESS_SERVE_SPECIFICATION`
-- `HEADLESS_SPECIFICATION_TEMPLATE_NAME`
+- `HEADLESS_ADAPTER`: documented extension point for changing default headless behavior.
+- `HEADLESS_CLIENTS`: declares the supported client types and changes the available endpoint surface; for example, setting it to `("app",)` will remove all `"browser"` related endpoints instead of merely changing frontend presentation.
+- `HEADLESS_FRONTEND_URLS`: sends allauth-generated confirmation/reset/signup/provider-error links to your SPA/frontend.
+- `HEADLESS_ONLY`: removes normal account views while leaving provider callback handling in place through `allauth.urls`.
+- `HEADLESS_SERVE_SPECIFICATION`: enables the OpenAPI endpoints such as `/_allauth/openapi.yaml`, `/_allauth/openapi.json`, and `/_allauth/openapi.html`; this requires the `django-allauth[headless-spec]` extra.
+- `HEADLESS_SPECIFICATION_TEMPLATE_NAME`: chooses the template for the HTML specification view, so it only matters when spec serving is enabled.
 - `HEADLESS_TOKEN_STRATEGY`
 - `HEADLESS_JWT_ALGORITHM`
 - `HEADLESS_JWT_PRIVATE_KEY`
